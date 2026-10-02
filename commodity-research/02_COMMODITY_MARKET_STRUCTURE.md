@@ -1,6 +1,6 @@
 # 02 — Commodity Market Structure
 
-> Status: **Part A (Phase 2, Equities vs Commodities) v0.1 complete. Part B (Phase 3, curve & continuous-futures construction) v0.1 draft**: construction methods are covered because the database design depends on them. Empirical curve research (slope as a signal, PCA, etc.) lives in **11_COMMODITY_TERM_STRUCTURE.md**.
+> Status (v0.2, specs/sources checked 2026-10-02; tags as in 01): **Part A (Phase 2, Equities vs Commodities) v0.1 complete. Part B (Phase 3, curve & continuous-futures construction) v0.1 draft**: construction methods are covered because the database design depends on them. Empirical curve research (slope as a signal, PCA, etc.) lives in **11_COMMODITY_TERM_STRUCTURE.md**.
 > Concept definitions are in **01** (referenced as `01#n`). Evidence labels: [FACT] [THEORY] [EMPIRICAL] [BELIEF] [OPEN] [HYPOTHESIS].
 
 ---
@@ -114,7 +114,7 @@ Notes [FACT]:
 | Rule | Description | Pros | Cons / risks |
 |---|---|---|---|
 | Fixed days before FND/LTD | e.g. roll 5 business days before FND (physical) or LTD (cash-settled) | Deterministic, no look-ahead | May roll before/after liquidity actually shifts |
-| Index-style fixed window | e.g. S&P GSCI roll: 5th–9th business day of month, 20%/day `[VERIFY]` | Mirrors investable indices | Front-running of known index rolls (documented by Mou 2010 [EMPIRICAL, verify]) |
+| Index-style fixed window | e.g. S&P GSCI roll: 5th–9th S&P GSCI business day of month, 20%/day `[V-S: S&P GSCI Methodology]` | Mirrors investable indices | Front-running of known index rolls (Mou 2010, hosted by CFTC [EMPIRICAL]) |
 | Volume or OI crossover | Roll when next contract's volume/OI exceeds current | Follows liquidity | **Look-ahead** if using same-day volume/OI (OI is published T+1); must lag by ≥1 day |
 | Active-months only | Gold: Feb/Apr/Jun/Aug/Oct/Dec; copper: Mar/May/Jul/Sep/Dec | Matches where liquidity is | Must be encoded per commodity and per era |
 | Curve-optimal ("carry-optimised") | Choose contract on curve with best roll yield | Can improve returns | It's a *strategy*, not a data convention; keep separate |
@@ -141,13 +141,14 @@ Concepts → 01#21–25, 30, 36. Empirical relationships (slope ↔ inventory, s
 | ICE Data | Brent and ICE contracts | Paid | |
 | LME | Official prices, stocks | Licensed/paid | LME 3M structure differs from monthly futures |
 | Vendors (Norgate, CSI Data, Barchart, Databento, Refinitiv/LSEG, Bloomberg) | Varies | Paid (wide price range) | Check each for per-contract (not only continuous) history and roll calendars [OPEN-3.1] |
-| EIA | Spot and futures contracts 1–4 for WTI, Henry Hub, products | Free | Only first few contracts; good for slope features in energy |
-| MCX bhavcopy / historical data | Per-contract daily for MCX | Free on website (format changes over time) [VERIFY] | Needs scraping/cleaning; check depth of history |
-| Nasdaq Data Link (ex-Quandl) | Historic free futures datasets (CHRIS) | — | Free continuous datasets were discontinued `[VERIFY]`; do not depend on them |
+| EIA | Spot prices; **historical** NYMEX contracts 1–4 for WTI, Henry Hub, products | Free | **EIA stopped publishing futures prices after 5 Apr 2024** `[V-S: eia.gov]` — usable only for pre-2024 history, not as an ongoing source |
+| MCX bhavcopy | Official EOD file per contract: settle, OHLC, volume, OI (futures & options); MCX operating since Nov 2003 | Free, no login (mcxindia.com → Market Data → Bhavcopy) `[V-2]` | Needs scraping/cleaning; earliest available date and format changes [OPEN-3.6] |
+| Nasdaq Data Link (ex-Quandl) | CHRIS continuous futures (ratio-adjusted) | — | **Deprecated, no longer updated**; also had documented data-integrity gaps `[V-2]` — do not use |
 
 ## B.9 Open research questions (Part B)
 - [OPEN-3.1] Which affordable vendor provides per-contract daily history (incl. expired contracts and FND/LTD) for GC, SI, HG, CL, NG, aluminium (CME ALI or LME)?
 - [OPEN-3.2] Optimal N (days before FND/LTD) per commodity, measured from lagged volume/OI crossover.
 - [OPEN-3.3] Size of roll-gap bias in naive vs correct series for each core commodity (quantifies how wrong naive backtests are).
 - [OPEN-3.4] Benchmark choice for aluminium: LME (global benchmark, licensed data, 3M forward structure) vs CME aluminium (less liquid) vs MCX. Needs a decision before database build.
-- [OPEN-3.5] Handling of negative prices in return and log-return calculations.
+- [OPEN-3.5] Handling of negative prices in return and log-return calculations (occurred on both NYMEX and MCX crude, Apr 2020).
+- [OPEN-3.6] Earliest date and format history of MCX bhavcopy files.

@@ -24,7 +24,9 @@ Global benchmark ≠ Indian contract: every module keeps **Global** and **MCX** 
 | [BELIEF] | Market folklore; untested |
 | [HYPOTHESIS] | Our testable proposition |
 | [OPEN] | Open research question — not answerable reliably yet |
-| [VERIFY] | Specific number/rule quoted from memory; must be checked against primary source |
+| [V-S] | Number/rule confirmed via search excerpt of the official exchange/regulator document (direct fetch blocked) |
+| [V-2] | Confirmed by ≥2 secondary (broker/vendor) sources only |
+| [VERIFY] | Quoted from memory; still unchecked |
 
 ## Research architecture
 Three layers; each concept is defined **once** and cross-referenced.
@@ -43,8 +45,8 @@ Three layers; each concept is defined **once** and cross-referenced.
 ## File map
 | File | Phase(s) | Status |
 |---|---|---|
-| [01_COMMODITY_FOUNDATIONS.md](01_COMMODITY_FOUNDATIONS.md) | 1 | v0.1 draft complete |
-| [02_COMMODITY_MARKET_STRUCTURE.md](02_COMMODITY_MARKET_STRUCTURE.md) | 2, 3 | Phase 2 v0.1 complete; Phase 3 construction draft |
+| [01_COMMODITY_FOUNDATIONS.md](01_COMMODITY_FOUNDATIONS.md) | 1 | v0.2 — specs checked |
+| [02_COMMODITY_MARKET_STRUCTURE.md](02_COMMODITY_MARKET_STRUCTURE.md) | 2, 3 | Phase 2 v0.1 complete; Phase 3 construction draft; sources checked (v0.2) |
 | 03_COMMODITY_DATA_ARCHITECTURE.md | 18 | Not started |
 | 04_GOLD_RESEARCH.md | 5 (+11 gold links) | Not started |
 | 05_CRUDE_OIL_RESEARCH.md | 6 | Not started |

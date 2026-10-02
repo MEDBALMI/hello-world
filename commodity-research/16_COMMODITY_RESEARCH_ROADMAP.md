@@ -54,12 +54,13 @@ Rationale: market structure and data construction come before commodity modules 
 ## Key risks to the program
 | Risk | Impact | Mitigation |
 |---|---|---|
-| Cost/availability of per-contract history (esp. LME) | Blocks Phase 3 testing | Vendor evaluation early (step 3); EIA free contracts 1–4 for energy as fallback |
+| Cost/availability of per-contract history (esp. LME) | Blocks Phase 3 testing | Vendor evaluation early (step 3). EIA contracts 1–4 cover energy only up to 5 Apr 2024 (publication stopped) — not an ongoing fallback. MCX bhavcopy is free for MCX contracts |
 | Small universe (6 core, ≤11 total) | Cross-sectional strategies have little breadth; high risk of overfitting | Prefer time-series tests; strict multiple-testing control; pool evidence across commodities |
 | Regime breaks (financialisation ~2004, shale ~2010, US exports 2016, MCX regulatory changes, 2020/2022 shocks) | Unstable relationships | Sub-period tests, structural-break tests |
 | Look-ahead in fundamentals/positioning | Inflated results | Release-timestamped tables; vintage data |
 | MCX-specific costs (CTT, stamp duty, exchange fees, GST), expiry mismatch, lot changes | Global edge may not survive locally | Dedicated MCX cost model in 14 |
-| Numbers quoted from memory | Spec errors | [VERIFY] tags; SOURCE_REGISTER status |
+| Numbers quoted from memory | Spec errors | [V-S]/[V-2]/[VERIFY] tags; SOURCE_REGISTER status. Primary sites (CME, CFTC, MCX) blocked from this environment — full verification needs network access or manual check |
+| CFTC COT program under review (May 2026 RFC on frequency/content) | Schema/history comparability | Track outcome (OPEN-1.6) |
 
 ## Consolidated open questions
 | ID | Question | Where |
@@ -72,4 +73,6 @@ Rationale: market structure and data construction come before commodity modules 
 | OPEN-3.2 | Optimal roll offset per commodity | 02 |
 | OPEN-3.3 | Size of naive roll-gap bias | 02 |
 | OPEN-3.4 | Aluminium benchmark choice (LME vs CME vs MCX) | 02 |
-| OPEN-3.5 | Negative-price handling | 02 |
+| OPEN-1.6 | Outcome of CFTC 2026 COT review | 01, 10 |
+| OPEN-3.5 | Negative-price handling (NYMEX & MCX crude, Apr 2020) | 02 |
+| OPEN-3.6 | MCX bhavcopy earliest date / format history | 02, 14 |

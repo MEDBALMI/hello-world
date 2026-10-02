@@ -1,6 +1,6 @@
 # 01 — Commodity Foundations (Phase 1)
 
-> Status: **v0.1 — draft, conceptual.** Contract numbers quoted as examples are taken from exchange specs as remembered and are flagged `[VERIFY]` until checked against the live exchange page (see SOURCE_REGISTER.md). No data has been downloaded yet.
+> Status: **v0.2 — draft, conceptual; spec numbers checked 2026-10-02.** Contract numbers carry a verification tag: `[V-S]` = confirmed via search excerpt of the official exchange/regulator document (direct page fetch was blocked by the environment's network policy); `[V-2]` = confirmed by ≥2 secondary (broker) sources only; `[VERIFY]` = still unchecked. See SOURCE_REGISTER.md. No data has been downloaded yet.
 >
 > Format per concept: **A** simple · **B** technical · **C** example · **D** why it matters · **E** quant variable · **F** data needed · **G** pitfalls.
 > Concepts that get a deep dive elsewhere are kept short here and cross-referenced (→ file).
@@ -77,7 +77,7 @@
 ### 6. Contract specification
 - **A.** The rulebook for a contract: what, how much, which quality, where, when, how priced.
 - **B.** Fields: underlying & grade, unit, size, price quotation, tick, listed months, trading hours, daily limits, termination rule, settlement method, delivery location/procedure, position limits. Published by exchange; can change over time. [FACT]
-- **C.** NYMEX WTI (CL): 1,000 bbl, light sweet crude delivered at Cushing, Oklahoma; physical delivery. `[VERIFY]`
+- **C.** NYMEX WTI (CL): 1,000 bbl, light sweet crude delivered at Cushing, Oklahoma; physical delivery (or EFRP). `[V-S: NYMEX Rulebook Ch. 200]`
 - **D.** Specs define tick value, P&L, delivery risk, expiry dates — everything mechanical in a backtest.
 - **E.** Static/time-versioned attributes table (`commodity_contracts`, valid_from/valid_to).
 - **F.** Exchange rulebook chapters (CME Rulebook Ch. per product; MCX contract launch circulars).
@@ -85,7 +85,7 @@
 
 ### 7. Contract size
 - **A.** Quantity of the commodity per contract.
-- **B.** Multiplier converting quoted price to money. [FACT] Examples `[VERIFY]`: GC 100 troy oz; SI 5,000 oz; HG 25,000 lb; CL 1,000 bbl; NG 10,000 MMBtu; LME Copper/Aluminium 25 t; MCX Gold 1 kg (quoted ₹/10 g); MCX Crude 100 bbl; MCX Natural Gas 1,250 MMBtu.
+- **B.** Multiplier converting quoted price to money. [FACT] Examples: GC 100 troy oz `[V-S]`; SI 5,000 oz `[V-S]`; HG 25,000 lb `[V-2]`; CL 1,000 bbl `[V-S]`; NG 10,000 MMBtu `[V-S]`; LME Copper/Aluminium 25 t `[V-S: lme.com]`; MCX Gold 1 kg, quoted ₹/10 g `[V-2]`; MCX Crude 100 bbl `[VERIFY]`; MCX Natural Gas 1,250 MMBtu (Mini 250) `[V-2]`.
 - **C.** GC at $2,600/oz × 100 oz = $260,000 notional per contract.
 - **D.** Determines position-sizing granularity. Big contract sizes make small accounts unable to size positions precisely (minis/micros exist for this).
 - **E.** `multiplier` field; used in P&L = Δprice × multiplier × contracts.
@@ -94,7 +94,7 @@
 
 ### 8. Tick size
 - **A.** Smallest allowed price move.
-- **B.** Minimum price fluctuation set by exchange. [FACT] e.g. GC $0.10/oz; CL $0.01/bbl; NG $0.001/MMBtu; HG $0.0005/lb `[VERIFY]`.
+- **B.** Minimum price fluctuation set by exchange. [FACT] e.g. GC $0.10/oz `[V-S]`; CL $0.01/bbl `[VERIFY]`; NG $0.001/MMBtu `[V-S: NYMEX Rulebook Ch. 220]`; HG $0.0005/lb `[V-2]`.
 - **C.** CL can go from 75.40 to 75.41, not 75.405.
 - **D.** Sets the floor on bid-ask spread → minimum transaction cost. Matters for short-horizon strategies.
 - **E.** `tick_size`; `spread_in_ticks`; cost model = k × tick_value.
@@ -103,7 +103,7 @@
 
 ### 9. Tick value
 - **A.** Money gained/lost per contract for a one-tick move.
-- **B.** tick_value = tick_size × multiplier. [FACT] GC $10; CL $10; NG $10; HG $12.50; SI (0.005 × 5,000) $25 `[VERIFY]`; MCX Gold ₹1/10 g × 100 = ₹100 `[VERIFY]`.
+- **B.** tick_value = tick_size × multiplier. [FACT] GC $10 `[V-S]`; CL $10 `[VERIFY]`; NG $10 (derived from V-S tick × size); HG $12.50 `[V-2]`; SI (0.005 × 5,000) $25 `[V-S]`; MCX Gold ₹1/10 g × 100 = ₹100 `[V-2]`; MCX Natural Gas ₹0.10 × 1,250 = ₹125 `[V-2]`.
 - **C.** A 50-tick adverse move in CL = $500 per contract.
 - **D.** Converts price noise into money; basis of slippage/cost modelling.
 - **E.** `tick_value` (currency-tagged).
@@ -165,7 +165,7 @@
 
 ### 15. Expiry
 - **A.** The date the contract stops trading.
-- **B.** Last Trading Day (LTD) set by spec rule. Before LTD, physically settled contracts usually have a **First Notice Day (FND)** when shorts can start delivering; speculators exit before FND. Examples `[VERIFY]`: CL terminates 3 business days before the 25th calendar day of the month preceding delivery; NG 3 business days before the first day of the delivery month; GC FND = last business day of the month before the delivery month. [FACT]
+- **B.** Last Trading Day (LTD) set by spec rule. Before LTD, physically settled contracts usually have a **First Notice Day (FND)** when shorts can start delivering; speculators exit before FND. Examples `[VERIFY]`: CL terminates 3 business days before the 25th calendar day of the month preceding delivery; NG 3 business days before the first day of the delivery month; GC FND = last business day of the month before the delivery month; GC LTD = third-last business day of the delivery month (12:30 CT). [FACT] `[V-S: NYMEX Ch. 200, Ch. 220; COMEX Ch. 113; CME gold FAQ]`. MCX Gold expiry: 5th of the contract month (or previous trading day) `[V-2]`.
 - **C.** CL Dec contract stops trading around 19–20 November.
 - **D.** Defines roll dates; liquidity migrates *before* expiry; prices can behave abnormally in the last days (April 2020 WTI at −$37.63 on 20 Apr 2020, day before expiry).
 - **E.** `days_to_expiry`, `days_to_FND`; roll-date flags.
@@ -175,7 +175,7 @@
 ### 16. Settlement
 - **A.** (i) Daily official price; (ii) how the contract is finally closed out at expiry.
 - **B.** Daily settlement price determined by exchange methodology (VWAP in a closing window, etc.). Final settlement = physical delivery or cash against an index. [FACT]
-- **C.** NG settles daily on a 2-minute VWAP window (CME methodology) `[VERIFY]`.
+- **C.** NG daily settlement: active month = VWAP of CME Globex trades 14:28:00–14:30:00 ET; other months settled from calendar-spread VWAPs in the same window; fallbacks if no trades `[V-S: CME NG Daily Settlement Procedure]`. CME energy settles at 14:30 ET, so CME-vs-MCX comparisons must align to this time.
 - **D.** Defines the price series for backtests and the obligations at expiry.
 - **E.** `settle`, `settlement_type`.
 - **F.** Settlement method docs.
@@ -183,7 +183,7 @@
 
 ### 17. Physical settlement
 - **A.** At expiry, sellers deliver real commodity; buyers pay and receive it.
-- **B.** Delivery via exchange-approved warehouse receipts/warrants/pipeline transfer, approved brands/refiners, delivery points. [FACT] Examples: CL (Cushing), GC (COMEX-approved vaults, bars of approved refiners), LME (warrants in LME-licensed warehouses), MCX Gold (compulsory delivery at specified vaults) `[VERIFY]`.
+- **B.** Delivery via exchange-approved warehouse receipts/warrants/pipeline transfer, approved brands/refiners, delivery points. [FACT] Examples: CL (Cushing), GC (COMEX-approved vaults, bars of approved refiners), LME (warrants in LME-licensed warehouses), MCX Gold (compulsory delivery, 995 purity) `[V-2]`; GC minimum 995 fineness `[V-S]`.
 - **C.** A speculator holding long CL into expiry must take 1,000 bbl at Cushing — impossible without storage → forced selling (2020).
 - **D.** Physical settlement ties futures to physical supply/demand (convergence). It is why curve shape tells you about physical scarcity.
 - **E.** Delivery notices / stocks as features (COMEX delivery reports, LME warrant data).
@@ -192,7 +192,7 @@
 
 ### 18. Cash settlement
 - **A.** At expiry, no delivery; difference is paid in cash vs a reference price.
-- **B.** Final settlement = index/reference price (e.g. ICE Brent settles against ICE Brent Index; MCX Crude settles on NYMEX WTI-linked price × RBI reference rate `[VERIFY]`). [FACT]
+- **B.** Final settlement = index/reference price (e.g. ICE Brent settles against ICE Brent Index; MCX Crude and MCX Natural Gas final settlement ("Due Date Rate") = NYMEX CL / NG front-month settlement on the MCX contract's last trading day × last available RBI USDINR reference rate, rounded to tick `[V-S: MCX contract-spec PDFs]`). [FACT] Consequence: MCX crude also went negative on 20 Apr 2020 (April contract settled at −₹2,884/bbl, per Business Standard/PTI).
 - **C.** MCX Crude long at expiry receives/pays difference vs final settlement price.
 - **D.** Removes delivery risk but introduces **reference-price risk** and different convergence behaviour.
 - **E.** `settlement_type`; final settlement reference.
@@ -327,7 +327,7 @@
 ### 32. Volume
 - **A.** Number of contracts traded in a period.
 - **B.** Per-contract and aggregate; electronic + pit/block/EFP may be reported separately. [FACT]
-- **C.** CL trades >1M contracts/day in active periods `[VERIFY]`.
+- **C.** CL is among the most heavily traded commodity futures in the world; exact average daily volume to be measured from data `[VERIFY]` rather than quoted.
 - **D.** Liquidity, cost estimation, roll timing. Equity "volume confirmation" ideas are *not* obviously transferable (volume is distorted by roll periods). [HYPOTHESIS to test in 15]
 - **E.** Aggregate volume across contracts; volume share by contract; volume z-score ex-roll windows.
 - **F.** Per-contract daily volume.
@@ -344,7 +344,7 @@
 
 ### 34. COT (Commitments of Traders)
 - **A.** Weekly CFTC report of futures positions by trader type.
-- **B.** Positions as of **Tuesday close**, released **Friday 15:30 ET** (delayed by holidays). Reports: Legacy (commercial/non-commercial), Disaggregated (producer/merchant, swap dealers, managed money, other reportables), TFF (financial futures). Futures-only and futures+options versions. Covers US exchanges only — **not LME, not MCX** (LME publishes its own COTR since 2014; SEBI/MCX publish limited participant-wise OI data `[VERIFY]`). [FACT] → 10.
+- **B.** Positions as of **Tuesday close**, released **Friday 15:30 ET** (delayed by holidays) `[V-S: cftc.gov]`. **Watch:** CFTC request for comment (91 FR 24207, 5 May 2026) is reviewing COT *frequency and content* — the schema and history may change; see OPEN-1.6. Reports: Legacy (commercial/non-commercial), Disaggregated (producer/merchant, swap dealers, managed money, other reportables), TFF (financial futures). Futures-only and futures+options versions. Covers US exchanges only — **not LME, not MCX** (LME publishes its own COTR since 2014; SEBI/MCX publish limited participant-wise OI data `[VERIFY]`). [FACT] → 10.
 - **C.** Friday's report describes positions held three days earlier.
 - **D.** Only systematic, long-history positioning dataset.
 - **E.** As 33; must timestamp to release time.
@@ -519,3 +519,4 @@
 - [OPEN-1.3] Does the curve slope predict total futures returns in our six core commodities individually (time-series), not only cross-sectionally?
 - [OPEN-1.4] What MCX participant/positioning data exists and from when?
 - [OPEN-1.5] What is the best free/low-cost source of contract-level history (see 02 §B.8 and SOURCE_REGISTER)?
+- [OPEN-1.6] Outcome of the CFTC 2026 COT program review (frequency/content changes) and its effect on historical comparability.

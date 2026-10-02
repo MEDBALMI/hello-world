@@ -4,6 +4,24 @@ Chronological record of what was done, decided, and left open. Newest first.
 
 ---
 
+## 2026-10-02 — Session 1b: source verification pass
+
+**Done**
+- Checked all `[VERIFY]` items in 01/02 against official documents. Direct fetches of cmegroup.com, cftc.gov and mcxindia.com are **blocked by this environment's network policy**, so facts were confirmed via web-search excerpts of official documents (`[V-S]`) or ≥2 secondary sources (`[V-2]`). New tag scheme added to 00.
+- Confirmed (V-S): GC/SI/NG/CL contract sizes and ticks (GC, SI, NG), CL & NG termination rules, GC FND/LTD, NG settlement window 14:28–14:30 ET, LME 25 t lots and prompt structure, COT Tuesday→Friday 15:30 ET timing, S&P GSCI roll window, MCX crude/NG final-settlement formula (NYMEX settle × RBI reference rate).
+
+**Corrections / material findings**
+- **EIA stopped publishing NYMEX futures prices after 5 Apr 2024.** Removed EIA as an ongoing free fallback for energy curve data (02 §B.8, 16).
+- **CFTC request for comment (May 2026) on COT frequency and content** → possible future schema change (OPEN-1.6).
+- MCX crude also settled negative in Apr 2020 (−₹2,884/bbl) because it settles on NYMEX → added to negative-price question (OPEN-3.5).
+- Nasdaq Data Link CHRIS confirmed deprecated with known integrity issues → excluded.
+
+**Still unchecked:** CL tick ($0.01), MCX crude lot size, CL volume figure, rough volatility ranges (to be measured from data), vendor "perpetual" definitions.
+
+**To reach full `VERIFIED` status:** allow cmegroup.com, cftc.gov, mcxindia.com, eia.gov, lme.com in the environment's network settings, or check manually.
+
+---
+
 ## 2026-10-02 — Session 1: program setup, Phases 1–2
 
 **Done**
