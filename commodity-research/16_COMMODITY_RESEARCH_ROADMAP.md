@@ -6,15 +6,15 @@
 | Step | Phases | Output | Status / gate |
 |---|---|---|---|
 | 1 | 1 Foundations, 2 Equities vs commodities | 01, 02-A | ✅ v0.1 |
-| 2 | 3 Futures market structure | 02-B | ✅ v1.0. Research series vs P&L series separated; roll policy ROLL-A defined |
+| 2 | 3 Futures market structure | 02-B | ✅ v1.0. Research series vs P&L series separated; ROLL-A = initial research assumption |
 | 3 | 18 Data architecture (design) | 03 | ✅ v1.0 design. Handling rules, timestamp framework, minimum data, universe review |
 | 4 | 14 Term structure (construction) | 11 | ✅ v0.1. Feature definitions only |
 | **5 (next)** | **Data sourcing decision** | SOURCE_REGISTER, 03 §7 | **Gate:** vendor chosen for per-contract CME history (OPEN-3.1); LME decision (OPEN-3.4/8.1); MCX bhavcopy depth known (OPEN-3.6) |
-| 6 | **Data pilot (validation only, no strategies)** | small DB build for GC, CL, MCX GOLD | **Gate:** validation rules V1–V8 pass; naive-vs-chained bias measured (OPEN-3.3); roll offsets calibrated (OPEN-3.2) |
+| 6 | **Data pilot (validation only, no strategies)** | small DB build for GC, CL, MCX GOLD | **Gate:** validation rules V1–V8 pass; naive-vs-chained bias measured (OPEN-3.3); roll offsets calibrated (OPEN-3.2); first roll-rule comparison (OPEN-3.8) |
 | 7 | 13 Positioning, 12 Seasonality (method sections) | 10, 12 | COT alignment implemented per 03 §6 |
 | 8 | Core modules: Gold → Crude → Copper → Silver → NatGas → Aluminium | 04–09 | Each lists hypotheses + data needs + timestamp table |
 | 9 | Cross-commodity (11), technical transfer (15) | 04–09, 15 | |
-| 10 | 17 MCX implementation | 14 | Specs, tender rules, costs, taxes |
+| 10 | 17 MCX research and implementation | 14 | Specs, tender rules, costs, taxes, **plus independent MCX research**: India-specific effects, USDINR, local liquidity and structure (03 §11.2) |
 | 11 | 16 Options | 13 | |
 | 12 | 19 Hypotheses, 20 Prioritisation | 15, 16 v1 | → testing program |
 
@@ -37,15 +37,18 @@ Steps 5–6 come **before Gold** because every module depends on reliable contra
 - Naive vs chained-return bias per commodity [OPEN-3.3]
 - Spot vs roll return decomposition per commodity [OPEN-1.2]
 - Effective breadth of the 11-market universe [OPEN-9.1]
+- Roll-rule comparison and sensitivity [OPEN-3.8]
 - Then the first hypotheses: time-series carry (H-TS1), time-series trend on chained series (baseline)
 
 ### 4. LATER
 - Fundamentals with vintages; COT features; seasonality tests
 - Equity pattern transfers (VCP, Cup & Handle, trend template)
+- Type B relative-value research (after type A foundations)
+- Type C cross-sectional research: supported by the design, testing deferred
 - Options / volatility premium; intraday execution; secondary-metal deep dives
 
 ### 5. CURRENTLY OUT OF SCOPE
-- Agriculture; live or paper trading; production code; physical/OTC trading; cross-sectional commodity strategies as a primary line (03 §9)
+- Agriculture; live or paper trading; production code; physical/OTC trading; testing type C cross-sectional strategies now (supported by the architecture, deferred; 03 §11.1)
 
 ## Key risks
 | Risk | Mitigation |
@@ -74,6 +77,8 @@ Steps 5–6 come **before Gold** because every module depends on reliable contra
 | OPEN-3.5 | Negative-price impact on 2020 crude | 02, 03 §5.7 |
 | OPEN-3.6 | MCX bhavcopy depth/format | 02, 03 |
 | OPEN-3.7 | MCX tender/delivery-period rules | 02, 03 |
+| OPEN-3.8 | Roll-rule comparison | 02, 03 |
+| OPEN-11.4 | Cross-venue timestamp alignment (types B/C) | 03 |
 | OPEN-6.1 | Historical release times | 03 |
 | OPEN-6.2 | Fundamental-data vintages | 03 |
 | OPEN-8.2 | Slippage calibration without intraday data | 03 |

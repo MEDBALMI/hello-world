@@ -104,6 +104,16 @@ Backtest outputs (positions, trades, integer-lot P&L) belong to a later `researc
 | `mkt.rate_daily` | (rate_id, d) | value, available_ts | US 3M T-bill / SOFR; India 91-day T-bill; TIPS real yields |
 | `mkt.etf_holdings` | (etf_id, holdings_date) | ounces/tonnes, available_ts | Issuer data; date conventions vary |
 
+### 3.6b Research-type support (see §11)
+| Table | PK | Key fields | Supports |
+|---|---|---|---|
+| `ref.universe` | universe_id | name, research_type (A/B/C), description, inclusion_rule | All types |
+| `ref.universe_membership` | (universe_id, root_id, valid_from) | valid_to, reason | **Point-in-time membership.** Avoids survivorship and look-ahead in cross-sectional tests (a market enters only when it is launched, liquid and has data) |
+| `ref.spread_definition` | spread_id | legs (root_id, weight, unit conversion, FX conversion), quote convention (ratio / difference / log-ratio), timestamp alignment rule | Type B (gold/silver ratio, gold/copper, crack-style spreads, MCX-vs-global basis) |
+| `derived.spread_value` | (spread_id, trade_date) | value, leg contract IDs, leg timestamps, max timestamp gap, available_ts | Type B; flags non-synchronous legs |
+| `derived.panel_view` | (view) | root_id × as_of_date matrix of features and returns on a common decision calendar | Type C ranking; type A pooling |
+| `ref.decision_calendar` | (calendar_id, decision_ts) | venues covered, rule (e.g. after all relevant settlements) | Cross-venue alignment for types B and C |
+
 ### 3.7 Relationships (core)
 
 ```
@@ -143,7 +153,7 @@ exchange 1─* trading_calendar ; exchange 1─* instrument_root
 - MCX compulsory-delivery contracts: use the tender/delivery-period start and any pre-expiry margin escalation [OPEN-3.7].
 
 ### 5.3 Roll dates
-- Policy ROLL-A (02 §B.6). Schedules are computed with information as of each date (lagged volume/OI) and **stored before use**.
+- Policy ROLL-A (02 §B.6) is the **initial research default, an assumption, not a conclusion**. Alternative rules are compared later (OPEN-3.8). Schedules are computed with information as of each date (lagged volume/OI) and **stored before use**, one schedule per policy version.
 - Roll executed at settlement on the roll date(s) via a spread trade. Cost = cost_model(spread ticks × tick_value + fees).
 - If the target contract fails eligibility on the scheduled date (illiquid, limit-locked, missing), roll the next eligible day. If none is eligible before `delivery_risk_date − buffer`, force the roll on the last eligible day and log a quality event.
 
@@ -256,9 +266,9 @@ Prices follow the same logic: `settle_available_ts` = official settlement time (
 | Risk-free rates | USD 3M T-bill (or SOFR spliced), INR 91-day T-bill |
 | USDINR reference fixing | For MCX conversion and MCX-vs-global analysis |
 | Cost model inputs | Tick sizes, fee schedules, MCX taxes, a slippage assumption per liquidity tier |
-| **History length** | Global (CME): **≥ 20 years daily** per market (covers 2008, 2014–16, 2020, 2022; ≥ 2 rate cycles). Trend and carry tests ideally 30+ years. MCX: all available (~2005+) — used for **implementation validation**, not discovery |
+| **History length** | Global (CME): **≥ 20 years daily** per market as a *planning target* (covers 2008, 2014–16, 2020, 2022; ≥ 2 rate cycles). Trend and carry tests ideally 30+ years. The target is driven by regime coverage; power is assessed per test under §8.4. MCX: all available history (~2005+). Used for independent MCX research (§11.2), not only implementation checks |
 
-Why 20 years: Sharpe ratio t-stat ≈ SR × √years. A true per-market SR of 0.4 needs ~25 years for t ≈ 2. Shorter samples cannot separate modest effects from noise per market. Pooling across markets helps only partly (§9).
+Why long history: mainly **regime coverage** (crises, rate cycles, structural breaks). Statistical power depends on the test design and must be stated per test (§8.4). It is not captured by a single universal "years needed" rule.
 
 ### 8.2 Useful (needed for specific hypothesis families)
 - Full listed curve (all months) → curve features beyond F1/F2 (11).
@@ -268,6 +278,24 @@ Why 20 years: Sharpe ratio t-stat ≈ SR × √years. A true per-market SR of 0.
 - Spot benchmarks: LBMA, LME cash, Henry Hub cash.
 - Historical margins and price-limit events.
 - Bid-ask samples or intraday bars to calibrate slippage.
+
+### 8.4 Statistical-power reporting standard
+Any statement about the sample size needed, t-statistics or power **must state**:
+1. **Observation frequency** (daily, weekly, monthly; overlapping or not).
+2. **Independence assumption** (i.i.d., or the autocorrelation structure assumed or estimated).
+3. **Sharpe annualisation convention** (e.g. SR_ann = SR_period × √periods per year, which assumes no autocorrelation).
+4. **Effective sample size** (after overlap, autocorrelation and cross-market correlation).
+5. **Test methodology** (e.g. t-test on mean excess return, HAC/Newey-West errors, block bootstrap, panel with date-clustered errors, multiple-testing adjustment).
+
+Statements that lack these are tagged [VERIFY] or [ILLUSTRATIVE].
+
+**[ILLUSTRATIVE] example only, not a rule.** Assume non-overlapping monthly excess returns, i.i.d. and normally distributed, SR_ann = SR_monthly × √12, a one-sample t-test of mean = 0, and effective n = number of months. Then t ≈ SR_ann × √(years). A true SR_ann of 0.4 gives t ≈ 2 after ≈ 25 years. Each assumption can fail:
+- Serial correlation (common in trend/carry returns) changes the effective n and the √12 annualisation (Lo 2002 [EMPIRICAL, verify]).
+- Fat tails and skew distort t-test coverage.
+- Overlapping holding periods inflate naive t-stats (use HAC or block bootstrap).
+- Under i.i.d., sampling daily instead of monthly does **not** add power for the mean; the calendar span does.
+- Testing many variants raises the required hurdle (multiple-testing literature, e.g. Harvey, Liu & Zhu 2016 [EMPIRICAL, verify]).
+- Pooling across markets increases effective n only to the extent that returns are not correlated (§9).
 
 ### 8.3 Optional (later)
 - Full intraday history; options settlements and IV surfaces (13); ETF holdings; macro vintages (ALFRED); freight, TC/RC, crack spreads; China data; alternative data.
@@ -284,7 +312,7 @@ Why 20 years: Sharpe ratio t-stat ≈ SR × √years. A true per-market SR of 0.
 
 All correlations are [HYPOTHESIS] until measured [OPEN-9.1].
 
-- **Effective breadth:** roughly 5–7 effective markets for asset returns. Strategy-return correlations (e.g. trend signals) are often lower than asset correlations, so breadth may be somewhat higher for strategies. Illustration: with N = 11 and average pairwise strategy correlation ρ, effective N = N / (1 + (N−1)ρ) → ρ = 0.1 gives 5.5; ρ = 0.2 gives 3.7.
+- **Effective breadth:** roughly 5–7 effective markets for asset returns. Strategy-return correlations (e.g. trend signals) are often lower than asset correlations, so breadth may be somewhat higher for strategies. [ILLUSTRATIVE] Assume equal volatilities, a single common pairwise correlation ρ between strategy returns, and equal weights. Then effective N = N / (1 + (N−1)ρ): with N = 11, ρ = 0.1 gives 5.5 and ρ = 0.2 gives 3.7. Real correlations are unequal and time-varying → measure (OPEN-9.1).
 - **Data access is the real constraint:**
   - **CME:** long, liquid, affordable history exists for 7 markets (GC, SI, PL, PA, HG, CL, NG).
   - **Aluminium, zinc, nickel, lead:** the global benchmark is **LME** (licensed, forward-style prompt structure). CME versions of these are thin.
@@ -293,7 +321,7 @@ All correlations are [HYPOTHESIS] until measured [OPEN-9.1].
   - Per-market time-series tests with long histories.
   - **Pooled panel tests** across markets (with standard errors clustered by date, to avoid overstating power).
   - Regime and sub-period robustness.
-  - Global → MCX implementation transfer.
+  - Global → MCX transfer, plus independent MCX research (§11.2).
 - **What it supports poorly:**
   - Cross-sectional ranking (terciles of 11 = 3–4 names, dominated by clusters).
   - Exploratory searches with many parameters (multiple-testing risk is high relative to breadth).
@@ -301,11 +329,36 @@ All correlations are [HYPOTHESIS] until measured [OPEN-9.1].
   1. Pre-register hypotheses and parameters.
   2. Prefer few-parameter, economically motivated rules.
   3. Use **time** (long histories, regime splits) as the main source of independent evidence.
-  4. Replicate across venues (CME vs LME vs MCX). This is *not* independent evidence, but it does check implementation robustness.
+  4. Replicate across venues (CME vs LME vs MCX). For *general commodity effects* this is not independent evidence, because the venues share the underlying price. MCX is additionally a research target in its own right for India-specific effects (§11.2).
   5. Reserve a final hold-out period untouched until the end.
   6. Within the existing scope, Brent alongside WTI adds a benchmark check rather than a new bet.
 
 **Conclusion:** sufficient for a rigorous **time-series** program, provided we accept modest diversification, rely on long history, and treat LME data acquisition as a priority decision. It is not suited to cross-sectional commodity strategies as a primary research line.
+
+## 11. Research architecture: research types and venues
+
+### 11.1 Three research types
+| Type | Question | Examples | Key data/DB support | Main statistical risks | Status |
+|---|---|---|---|---|---|
+| **A. Single-commodity time-series** | Does a signal predict *this* market's future returns? | Trend, carry (TS1), inventory surprise, COT extremes on gold | `derived.tradable_return`, `derived.feature_value`, `fund.*` with timestamps | Low per-market power; regime dependence; overlapping returns | **Primary line; first to be tested** |
+| **B. Cross-commodity / relative-value** | Does the relationship between two or more markets predict relative returns, or one market's returns? | Gold/silver ratio, gold vs real yields, copper vs aluminium, crude vs NG, MCX vs global basis | `ref.spread_definition`, `derived.spread_value`, `ref.decision_calendar` | **Non-synchronous prices across venues**; unit/FX conversion errors; unstable relationships; cointegration ≠ predictability | Designed; tested after type A foundations |
+| **C. Cross-sectional selection** | Does ranking markets on a signal on the same date predict relative returns? | Carry ranking, momentum ranking across the 11 markets | `ref.universe_membership` (point-in-time), `derived.panel_view`, common decision calendar | Very low breadth (03 §9); cluster domination; survivorship if membership is not point-in-time | **Supported by the architecture; not tested now** |
+
+Rules:
+- Every hypothesis in 15 is tagged with its type (A/B/C) and its venue (Global / MCX / Both).
+- Types B and C must use a decision calendar at which **all** legs' information is available (03 §6). Same calendar date ≠ same information set.
+- Type C results must report effective breadth and cluster-level attribution.
+
+### 11.2 Venue roles: Global vs MCX
+- **Global markets (CME/ICE/LME) are the primary source for discovering general commodity effects.** They have longer history, deeper liquidity and benchmark price formation.
+- **MCX is also tested independently**, not only as an implementation check, for:
+  1. **Implementation validity:** does a globally discovered effect survive in MCX contracts after MCX expiries, rolls and execution timing?
+  2. **India-specific effects:** import duties and their changes, local premiums/discounts, festival/wedding-season demand, Indian policy events.
+  3. **USDINR effects:** the MCX price ≈ global × USDINR (× duty adjustment). Measure the currency contribution to returns, risk and hedging.
+  4. **Local liquidity:** near-month concentration, depth by contract and session (Indian daytime vs US-overlap evening).
+  5. **Local contract structure:** expiry dates, tender/delivery periods, compulsory delivery, cash settlement on NYMEX references, lot sizes, mini/micro contracts.
+  6. **Local costs:** CTT, stamp duty, exchange/clearing fees, GST, margins, slippage.
+- MCX findings are labelled as *MCX-specific* or *global effect confirmed on MCX*. An effect found only on MCX needs an India-specific economic rationale before it is accepted.
 
 ## 10. Major unresolved data problems
 | ID | Problem |
@@ -314,6 +367,8 @@ All correlations are [HYPOTHESIS] until measured [OPEN-9.1].
 | OPEN-3.4 / 8.1 | LME data licensing and cost; aluminium benchmark choice; whether to treat zinc/nickel/lead as MCX-only |
 | OPEN-3.6 | MCX bhavcopy depth, format changes, symbol mapping |
 | OPEN-3.7 | MCX tender/delivery-period rules and history |
+| OPEN-3.8 | Comparison of roll rules (exchange-specific, volume-based, OI-based, calendar-based) |
+| OPEN-11.4 | Cross-venue timestamp alignment for type B/C research (LBMA, COMEX, LME, MCX closes) |
 | OPEN-1.1 | Historical margins and price-limit histories |
 | OPEN-6.1 | Historical release *times* for EIA/WGC/customs before electronic archives |
 | OPEN-6.2 | Point-in-time vintages for fundamental series (EIA revisions; ALFRED coverage) |

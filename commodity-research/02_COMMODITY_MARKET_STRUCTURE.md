@@ -261,14 +261,27 @@ Two levels share the same held-contract engine:
 
 ## B.6 Roll policy
 
-Rolls are set by the **roll policy** (versioned in `derived.roll_policy`, 03 §3.5). Recommended default, **ROLL-A**:
+Rolls are set by the **roll policy** (versioned in `derived.roll_policy`, 03 §3.5).
+
+> **Status: ROLL-A is the initial default *research assumption*, not a final conclusion.** It is chosen to be simple, look-ahead-free and conservative on delivery risk. Before results depend on it, it will be compared against alternatives (OPEN-3.8), and sensitivity of key results to the roll rule will be reported.
+
+Initial default, **ROLL-A**:
 1. Universe of holdable contracts = the root's **liquid months** (11 §2), as of the date.
 2. Roll **window** = the k business days ending `delivery_risk_date − buffer`. Defaults: buffer = 2 business days; k = 1 for research or up to 5 for realistic execution, with equal tranches.
 3. Roll **earlier** if, on t−1 data, the next eligible contract's volume and OI both exceed the current one's for 2 consecutive days. Lagged, so there is no look-ahead.
 4. The roll schedule is computed **once** from information available at each date and stored. Backtests read it; they never recompute it with future data.
 5. Per-commodity N/k calibrated from lagged volume/OI crossover statistics [OPEN-3.2]; until calibrated use the defaults above.
 
-Alternative policies (kept as separate versions, never mixed): S&P GSCI-style fixed window (5th–9th business day [V-S]), constant days-to-expiry, carry-optimised (that is a *strategy*, not a data convention).
+Alternative policies for the later comparison (OPEN-3.8). Each is kept as a separate version and never mixed:
+| Family | Example rule | Note |
+|---|---|---|
+| Exchange-specific | Per-root rule from exchange calendars (e.g. GC active months before FND; CL a fixed number of days before LTD; MCX before tender period) | Closest to practitioner behaviour |
+| Volume-based | Roll when the next contract's lagged volume exceeds the current one's | Follows liquidity; needs lagging |
+| Open-interest-based | Roll when the next contract's lagged OI exceeds the current one's | OI published T+1; lag ≥ 1 day |
+| Calendar-based | Fixed business-day window (e.g. S&P GSCI 5th–9th business day [V-S]); constant days-to-expiry | Deterministic; index-crowding risk |
+| Carry-optimised | Choose the contract with the best roll yield | A **strategy**, not a data convention. Tested only as a hypothesis |
+
+Comparison criteria: tracking of the most liquid contract, roll cost, delivery-risk exposure, sensitivity of headline research results.
 
 ## B.7 Artefact checklist (applies to every series)
 - [ ] Built from per-contract data we hold; roll schedule fixed in advance.
@@ -291,3 +304,4 @@ Moved to **03 §7** (single source of truth).
 - [OPEN-3.5] Negative prices → policy defined in 03 §5.7; test impact on 2020 crude.
 - [OPEN-3.6] MCX bhavcopy earliest date and format history.
 - [OPEN-3.7] MCX tender/delivery-period rules per bullion and base-metal contract and their history (sets `delivery_risk_date` for MCX).
+- [OPEN-3.8] Compare roll-rule families (exchange-specific, volume, OI, calendar) and measure the sensitivity of results to the roll rule.

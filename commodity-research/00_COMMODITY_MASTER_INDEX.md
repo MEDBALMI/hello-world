@@ -27,6 +27,7 @@ Global benchmark ≠ Indian contract: every module keeps **Global** and **MCX** 
 | [V-S] | Number/rule confirmed via search excerpt of the official exchange/regulator document (direct fetch blocked) |
 | [V-2] | Confirmed by ≥2 secondary (broker/vendor) sources only |
 | [VERIFY] | Quoted from memory; still unchecked |
+| [ILLUSTRATIVE] | Worked calculation under stated assumptions; not a general rule (see 03 §8.4) |
 
 ## Research architecture
 Three layers; each concept is defined **once** and cross-referenced.
@@ -41,6 +42,15 @@ Three layers; each concept is defined **once** and cross-referenced.
 3. **Implementation layer**
    - 03 Data architecture (PostgreSQL design) · 14 MCX implementation · 15 Hypotheses · 16 Roadmap
    - SOURCE_REGISTER · RESEARCH_LOG
+
+## Research types and venues (detail: 03 §11)
+| Type | Description | Status |
+|---|---|---|
+| A | Single-commodity time-series | Primary; tested first |
+| B | Cross-commodity / relative-value | Designed; after A |
+| C | Cross-sectional selection | Supported by the design; not tested yet |
+
+Venues: **Global** = primary for discovering general effects. **MCX** = tested independently (implementation, India-specific effects, USDINR, local liquidity, structure, costs). Every hypothesis is tagged Type × Venue.
 
 ## File map
 | File | Phase(s) | Status |

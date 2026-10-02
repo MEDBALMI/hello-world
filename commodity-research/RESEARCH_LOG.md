@@ -4,6 +4,21 @@ Chronological record of what was done, decided, and left open. Newest first.
 
 ---
 
+## 2026-10-02 — Session 3: corrections to Phase 3 / architecture (no new research)
+
+1. **Statistical power:** removed the "SR 0.4 needs ~25 years" claim.
+   - Added the reporting standard (03 §8.4): frequency, independence, annualisation, effective n and test method must all be stated.
+   - Kept the calculation only as an [ILLUSTRATIVE] example with its assumptions and failure modes. The effective-N illustration in 03 §9 now lists its assumptions too.
+   - The ≥ 20-year target is now justified by regime coverage.
+2. **Roll rule:** ROLL-A is marked as an initial research assumption (02 §B.6, 03 §5.3). Added a comparison plan for exchange-specific, volume, OI, calendar and carry-optimised families (OPEN-3.8). Roll-rule comparison added to the data-pilot gate.
+3. **MCX:** no longer "implementation validation only". Global markets are primary for general effects; MCX is tested independently for implementation, India-specific effects, USDINR, local liquidity, contract structure and costs (03 §11.2).
+4. **Research types A/B/C** added (03 §11.1, 00).
+   - New support tables (03 §3.6b): point-in-time universe membership, spread definitions and values, panel view, decision calendar.
+   - Type C is supported but its testing is deferred.
+5. No Gold work, no empirical tests, no web verification.
+
+---
+
 ## 2026-10-02 — Session 2: quantitative foundation (Phase 3 complete, data architecture)
 
 **Done**
