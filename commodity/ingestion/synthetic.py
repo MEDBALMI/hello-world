@@ -6,7 +6,7 @@ Purpose: exercise every pipeline stage end-to-end and measure whether the resear
 
 Model per root (log futures price for contract with maturity T, time to maturity tau in years):
     log F(t,T) = L_t + s_t * tau + season(month(T)) + e_T(t)
-    dL = s_t * dcal/365 + sigma_t * z1 + mu_t ;  ds = sigma_s * z2 ;  e_T random walk (tiny)
+    dL = s_t * dcal/365 + sigma_t * z1 - sigma_t^2/2 + mu_t (+ soft barrier beyond x8 or /8 of start) ;  ds = sigma_s * z2 ;  e_T random walk (tiny)
 which makes every individual contract a martingale (mu_t = 0) -> no strategy has an edge.
 Scenario CARRY sets mu_t = lam * (-s_t) * dcal/365 (backwardation premium).
 """
@@ -59,9 +59,19 @@ def _state(dates: pd.DatetimeIndex, p: dict, rng, scenario: str, lam: float):
         v = w + a * (sig[i] * z1[i]) ** 2 + b * v
     s = p["s0"] + np.cumsum(p["svol"] * np.sqrt(dcal / 365) * rng.standard_normal(n))
     s_prev = np.r_[p["s0"], s[:-1]]
-    mu = lam * (-s_prev) * dcal / 365 if scenario == "CARRY" else 0.0
-    dL = s_prev * dcal / 365 + sig * z1 - 0.5 * sig ** 2 + mu   # -0.5 sig^2: arithmetic martingale (no drift for long-only)
-    L = np.log(p["p0"]) + np.cumsum(dL)
+    mu = lam * (-s_prev) * dcal / 365 if scenario == "CARRY" else np.zeros(n)
+    base = s_prev * dcal / 365 + sig * z1 - 0.5 * sig ** 2 + mu   # -0.5 sig^2: arithmetic martingale
+    # Soft barrier: pure martingale inside +-log(8) of the start level; mean reversion (2/yr) only on the
+    # excess beyond the band. Keeps 30-year paths in a realistic range (no zero prices); introduces
+    # predictability only in rare extreme states (documented limitation of the synthetic null).
+    band, k_out, L0 = np.log(8.0), 2.0, np.log(p["p0"])
+    L = np.empty(n)
+    cur = L0
+    for i in range(n):
+        dev = cur - L0
+        excess = np.sign(dev) * max(abs(dev) - band, 0.0)
+        cur = cur + base[i] - k_out * excess * dcal[i] / 365
+        L[i] = cur
     return L, s, sig
 
 

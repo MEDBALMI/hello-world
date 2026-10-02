@@ -184,3 +184,16 @@ def test_erc_equalises_risk():
     w = _erc(cov)
     rc = w * (cov @ w)
     assert np.allclose(rc / rc.sum(), 1 / 6, atol=1e-6)
+
+
+def test_t3_flags_extreme_and_near_zero(data):
+    px = data["prices"][data["prices"].root == "CL"].copy()
+    i = px.index[5000]
+    px.loc[i, ["settle", "high", "low"]] = [px.loc[i, "settle"] * 3, px.loc[i, "settle"] * 3, px.loc[i, "settle"] * 3]
+    r = checks.t3_settlement(px, "CL")
+    assert r["result"] == "FAIL" and r["details"]["extreme_moves"] >= 1
+
+
+def test_synthetic_paths_stay_positive():
+    d = synthetic.generate(start="1995-01-01", end="2025-12-31", roots=("CL", "NG"), mcx=False, seed=7)
+    assert (d["prices"].settle > 0).all()

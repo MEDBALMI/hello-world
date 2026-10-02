@@ -317,8 +317,8 @@ def mcx_study(data: dict, gctx: dict, rs: runner.Research, records: list[dict]) 
             X = pd.DataFrame({"mcx": np.log1p(trd["gross_return"]), "glob_same": np.log1p(gr), "glob_lag1": np.log1p(gr).shift(1)})
             if fxr is not None:
                 X["usdinr"] = fxr
-            X = X.dropna()
-            if len(X) > 250:
+            X = X.replace([np.inf, -np.inf], np.nan).dropna()
+            if len(X) > 250 and np.isfinite(X.values).all():
                 A = np.column_stack([np.ones(len(X))] + [X[k] for k in X.columns if k != "mcx"])
                 beta, *_ = np.linalg.lstsq(A, X["mcx"].values, rcond=None)
                 fitted = A @ beta

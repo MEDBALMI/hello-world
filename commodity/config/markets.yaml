@@ -84,6 +84,7 @@ markets:
     ltd_rule: cl_rule                          # V-S (NYMEX Ch.200)
     fnd_rule: none                             # notices follow LTD -> delivery risk = LTD
     allows_negative: true
+    known_events: [2020-04-20, 2020-04-21]     # WTI negative settlement (reviewed, legitimate)
     cftc_code: "067651"                        # VERIFY
     spec_versions:
       - {valid_from: 1983-01-01, multiplier: 1000, tick: 0.01, commission: 2.50}
@@ -176,6 +177,7 @@ markets:
     ltd_rule: mcx_crude            # ~1 bd before NYMEX CL LTD (ASSUMPTION; bhavcopy expiry overrides)
     fnd_rule: none
     allows_negative: true
+    known_events: [2020-04-20, 2020-04-21]
     spec_versions:
       - {valid_from: 2005-01-01, multiplier: 100, tick: 1.0, commission: 20.0}     # VERIFY
   MCX_NATURALGAS:

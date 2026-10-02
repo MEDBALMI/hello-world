@@ -43,16 +43,27 @@ def t2_date_gaps(px, root):
                 rows_on_non_business_days=len(extra), note="calendar is rule-based approximation")
 
 
-def t3_settlement(px, root, sources=None):
-    allow_neg = market(root).get("allows_negative", False)
-    g = px.dropna(subset=["settle"])
+def t3_settlement(px, root, sources=None, max_abs_logret=0.4, near_zero_ticks=20):
+    m = market(root)
+    allow_neg = m.get("allows_negative", False)
+    known = {pd.Timestamp(d) for d in m.get("known_events", [])}
+    g = px.dropna(subset=["settle"]).sort_values(["contract_id", "trade_date"])
     has_range = g.high.notna() & g.low.notna() & (g.volume.fillna(0) > 0)
     out_rng = g[has_range & ((g.settle > g.high + 1e-9) | (g.settle < g.low - 1e-9))]
     neg = g[(g.settle <= 0)] if not allow_neg else g.iloc[0:0]
-    n_fail = len(out_rng) + len(neg)
+    # abnormal observations (03 s.5.9 V3): extreme same-contract moves and near-zero prices
+    tick = spec_frame(root, pd.DatetimeIndex(g.trade_date))["tick"].values
+    near_zero = g[(g.settle.abs().values < near_zero_ticks * tick) & ~g.trade_date.isin(known).values]
+    prev = g.groupby("contract_id").settle.shift(1)
+    lr = np.log(g.settle.where(g.settle > 0) / prev.where(prev > 0))
+    extreme = g[(lr.abs() > max_abs_logret) & ~g.trade_date.isin(known)]
+    n_fail = len(out_rng) + len(neg) + len(near_zero) + len(extreme)
     cross = "OPEN: single source - official settlement cross-check pending (17 s.7 test 2)" if not sources else "checked"
     res = "FAIL" if n_fail else ("OPEN" if not sources else "PASS")
-    return _res("T3", root, res, len(g), n_fail, settle_outside_range=len(out_rng), non_positive=len(neg), cross_source=cross)
+    return _res("T3", root, res, len(g), n_fail, settle_outside_range=len(out_rng), non_positive=len(neg),
+                near_zero=len(near_zero), extreme_moves=len(extreme),
+                extreme_examples=[(r.contract_id, str(r.trade_date.date())) for r in extreme.head(5).itertuples()],
+                cross_source=cross, note="extreme/near-zero rows are flagged for review, never deleted")
 
 
 def t4_volume(px, root):
