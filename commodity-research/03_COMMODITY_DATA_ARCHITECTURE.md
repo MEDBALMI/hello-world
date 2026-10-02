@@ -60,6 +60,11 @@ Notation: **PK** primary key; FK foreign key; `ts` = timestamptz (UTC); `d` = da
 | `meta.quality_event` | event_id | table_name, key (jsonb), d, rule_id, severity, description, action_taken, resolved_by, created_at_ts |
 | `meta.method_version` | method_id | kind (roll_policy / cm_method / cost_model / validation_rules), params (jsonb), created_at, notes |
 
+### 3.2b Source-level fields (added in Phase 4)
+- `meta.data_source` gains: `data_level` (L1 continuous / L2 active / L3 partial expired / L4 complete; see 17 §1), `close_is_settlement` (bool, verified flag), `oi_date_convention` (T / T+1), `licence_terms`, `acceptance_status` (untested / trial / accepted / rejected).
+- `meta.source_acceptance_test`: (source_id, root_id, test_id, run_ts, result, details). Records 17 §7 acceptance tests 1–7.
+- **Rule:** only `L4` + `accepted` sources may populate `clean.contract_daily` as the primary source. Other sources may be used only for cross-validation.
+
 ### 3.3 Raw (`raw`) — immutable
 
 | Table | PK | Key fields | Frequency / source |
@@ -241,12 +246,12 @@ Prices follow the same logic: `settle_available_ts` = official settlement time (
 | WGC Gold Demand Trends | quarter | ~4–5 weeks after quarter end | Release day (time often unknown → next session) | Next session |
 | ETF holdings | holdings date | Issuer end-of-day / next morning | Next session | Next session |
 
-## 7. Data sources (single source of truth; see SOURCE_REGISTER)
+## 7. Data sources (summary — **detailed evaluation, decision matrix and acceptance tests in 17**)
 | Need | Primary | Alternatives | Status |
 |---|---|---|---|
-| CME per-contract daily (incl. expired) | CME DataMine (paid) | Norgate, CSI Data, Barchart, Databento, LSEG, Bloomberg | OPEN-3.1 |
-| LME prices and stocks | LME (licensed) | Vendors redistributing LME | OPEN-3.4/8.1 |
-| MCX per-contract daily | MCX bhavcopy (free) [V-2] | Vendors | OPEN-3.6 |
+| CME per-contract daily (incl. expired) | CME DataMine EOD (official, 1982+) [V-S] | Norgate / CSI (L4, ~1980+) to trial; Databento (2010+, settlement/OI/definitions) for validation; IBKR (2-year expired limit) for live only | OPEN-3.1, 17.1, 17.2 |
+| LME prices and stocks | LME historical Official & Settlement Prices (2000+, priced per contract-year) [V-S] | Bloomberg/LSEG; vendor coverage [VERIFY] | OPEN-3.4, 17.5 |
+| MCX per-contract daily | MCX bhavcopy (free) [V-2] | MCX historical data feed (tick, on request, ≥ 1 year) [V-S]; Kite continuous (cross-check only) | OPEN-3.6, 17.3 |
 | Energy contracts 1–4 (history only, to 5 Apr 2024) | EIA [V-S] | — | Free validation set |
 | COT | CFTC historical files | — | Free |
 | EIA fundamentals | EIA (API) | — | Free; vintages limited |

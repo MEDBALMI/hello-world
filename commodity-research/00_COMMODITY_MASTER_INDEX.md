@@ -3,7 +3,7 @@
 **Objective:** build institutional-quality understanding of metals and energy futures (global + MCX), then develop and rigorously test hypotheses. **Not** a strategy search.
 
 **Pipeline:** Knowledge → Market structure → Data → Hypotheses → Historical testing → Robustness → OOS → Paper trading → Live.
-**Current stage:** Quantitative foundation complete (Phases 1–3, data architecture design). Next: data sourcing decision and a data-validation pilot. No data downloaded, no backtests, no strategies.
+**Current stage:** Quantitative foundation complete (Phases 1–3, data architecture design). Phase 4 (data acquisition) desk research done (17); awaiting review before quotes/trials and the validation pilot. No data downloaded, no backtests, no strategies.
 
 ## Scope
 | Tier | Commodities |
@@ -70,7 +70,8 @@ Venues: **Global** = primary for discovering general effects. **MCX** = tested i
 | 13_COMMODITY_OPTIONS.md | 16 | Not started |
 | 14_MCX_IMPLEMENTATION.md | 17 | Not started |
 | 15_COMMODITY_HYPOTHESES.md | 19, 11, 15 | Not started |
-| [16_COMMODITY_RESEARCH_ROADMAP.md](16_COMMODITY_RESEARCH_ROADMAP.md) | 20 | v0.2 |
+| [16_COMMODITY_RESEARCH_ROADMAP.md](16_COMMODITY_RESEARCH_ROADMAP.md) | 20 | v0.3 |
+| [17_COMMODITY_DATA_SOURCES.md](17_COMMODITY_DATA_SOURCES.md) | 4 (data acquisition) | v0.1 desk research; decision matrix |
 | [SOURCE_REGISTER.md](SOURCE_REGISTER.md) | all | v0.1 |
 | [RESEARCH_LOG.md](RESEARCH_LOG.md) | all | ongoing |
 

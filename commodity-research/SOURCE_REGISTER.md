@@ -76,5 +76,18 @@ Priority: 1 Exchange · 2 Government agency · 3 Regulator · 4 Official statist
 | AC-19 | Koijen, R., Moskowitz, T., Pedersen, L.H. & Vrugt, E. (2018). Carry. *JFE* | Carry across asset classes |
 | AC-20 | Bakshi, G., Gao, X. & Rossi, A. (2019). Understanding the sources of risk underlying the cross section of commodity returns. *Management Science* | Factor structure |
 
-## Candidate data vendors (to evaluate — OPEN-3.1)
-Norgate Data, CSI Data, Barchart, Databento, LSEG/Refinitiv, Bloomberg. (Nasdaq Data Link CHRIS: deprecated, excluded.) Evaluation criteria: per-contract history incl. expired contracts, depth, FND/LTD metadata, settlement vs close, cost, licence terms.
+## Data sources evaluated in Phase 4 (details and decision matrix → 17)
+| ID | Source | Data level (17 §1) | Key verified facts | Status |
+|---|---|---|---|---|
+| DS-CMEDM | CME DataMine End-of-Day | L4 | EOD from 1 Jan 1982 or inception; OHLC, volume, OI, settlement; purchased per product; daily stl files after ~18:00 CT, delivered T+1 (CME Client Systems Wiki, Settlements FAQ) | V-S 2026-10-02 |
+| DS-DBN | Databento GLBX.MDP3 | L4 from 2010-06-06 | History extended to June 2010 (backfilled from DataMine legacy feed; MBP-10 max pre-2017; SendingTime timestamps to May 2017); statistics schema = settlement, OI, volume; definitions schema = symbol, expiration, contract size; pre-May-2017 SettlPriceType normalisation missing (databento.com blog/datasets/issues) | V-S 2026-10-02 |
+| DS-NORGATE | Norgate Data futures | L4 | All individual contracts incl. expired; ~100 markets / 11 exchange groups; back to ~1980; OHLC, volume, OI; continuous roll = business day before FND (deliverable) or LTD (cash) (norgatedata.com FAQ / futures package) | V-S 2026-10-02 (close = settle? VERIFY) |
+| DS-CSI | CSI Data Unfair Advantage | L4 (claimed) | Very long history; built-in continuous methods (back/ratio/Gann/perpetual); expiry schedules (csidata.com) | V-S partial |
+| DS-BARCHART | Barchart OnDemand | Individual incl. expired | getHistory; getFuturesExpirations returns FND and LTD (barchart.com/ondemand/api) | V-S partial (depth OPEN) |
+| DS-IBKR | Interactive Brokers TWS API | L3 | Expired futures only up to 2 years after expiry (`includeExpired`); pacing limits (TWS API Historical Data Limitations) | V-S 2026-10-02 |
+| DS-KITE | Zerodha Kite Connect | L1/L2 | Expired futures only via continuous=1, daily candles; expired instrument tokens not retrievable (Zerodha support, kite.trade forum) | V-S 2026-10-02 |
+| DS-LMEHIST | LME historical data — Official & Settlement Prices | Prompt-based | From 2000; USD 85 per contract-year for first 5, USD 55 thereafter; Dec forward prompts added from 17 Oct 2011; Unofficial Prices USD 72/46 (2000–2021) (lme.com historical-data PDFs) | V-S 2026-10-02 |
+| DS-MCXBHAV | MCX Bhavcopy | L4 in principle | Contract-wise daily OHLC, volume, value, OI; free date-wise download; earliest date OPEN | V-2 |
+| DS-MCXFEED | MCX Data Feed historical | Tick (order/trade book) | On request, ≥ 1 year; up to 3 months free excluding latest 12 months; Data Feed Policy v6.8 (28 May 2024) | V-S 2026-10-02 |
+| DS-EIAFUT | EIA NYMEX contracts 1–4 | Position-based | Discontinued after 5 Apr 2024 | V-S |
+| DS-REJECT | Yahoo/Stooq/Investing.com continuous; Nasdaq CHRIS | L1 | Front-month spliced / deprecated | Rejected for research series |

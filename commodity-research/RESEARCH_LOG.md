@@ -4,6 +4,30 @@ Chronological record of what was done, decided, and left open. Newest first.
 
 ---
 
+## 2026-10-02 — Session 4: Phase 4 data acquisition & validation (desk research)
+
+**Done**
+- Created 17_COMMODITY_DATA_SOURCES.md:
+  - Data-level taxonomy L1–L4 (continuous / active / partial expired / complete).
+  - Source inventory by category: exchange, vendor, broker, free, academic.
+  - Metadata sourcing, quality-issue tests, per-market matrix.
+  - **Data acquisition decision matrix** and **7 acceptance tests**.
+- 03: added source-level fields (data level, close = settlement flag, OI date convention, acceptance status) and the rule that only L4 + accepted sources populate clean data. §7 summary now points to 17.
+- 16 step 5 updated with next actions and gate. SOURCE_REGISTER: 12 data-source entries with verified facts.
+
+**Key findings** (web-search excerpts of provider docs; direct exchange fetches blocked)
+- CME DataMine EOD goes back to 1982 (official settlement, volume, OI). Paid per product; price unknown.
+- Databento CME history starts June 2010, with statistics (settlement/OI) and definitions (expiration, size). Too short alone.
+- Norgate claims all individual contracts incl. expired back to ~1980. Close = settlement is not yet verified.
+- IBKR: expired futures only for 2 years after expiry. Zerodha Kite: expired MCX contracts only as a continuous daily series. **Neither is a history source.**
+- LME: official/settlement prices only from 2000, priced per contract-year (USD 85/55). Prompt structure, not monthly contracts.
+- MCX: bhavcopy is free and contract-wise, with OI, but the earliest date and the field history are unconfirmed. The MCX historical data feed is tick-level, on request, minimum 1 year.
+- No single source supplies FND/LTD/spec history for the full period → curated metadata layer is required.
+
+**Nothing purchased, downloaded or tested. Waiting for review.**
+
+---
+
 ## 2026-10-02 — Session 3: corrections to Phase 3 / architecture (no new research)
 
 1. **Statistical power:** removed the "SR 0.4 needs ~25 years" claim.
