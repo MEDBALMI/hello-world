@@ -34,7 +34,7 @@ def available() -> bool:
 
 def init_schema() -> None:
     with connect() as conn:
-        conn.execute(SCHEMA_FILE.read_text())
+        conn.execute(SCHEMA_FILE.read_text(encoding="utf-8"))
         conn.commit()
 
 

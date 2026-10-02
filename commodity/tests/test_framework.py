@@ -217,3 +217,15 @@ def test_signflip_permutation_detects_persistent_edge():
         return (np.sum(np.array(sims) >= actual) + 1) / (reps + 1)
     assert p_value(with_edge) < 0.05
     assert p_value(noise) > 0.05
+
+
+def test_text_file_io_declares_utf8():
+    """Reports contain non-ASCII symbols; Windows defaults to cp1252, so every text read/write must say utf-8."""
+    import re
+    from pathlib import Path
+    pkg = Path(__file__).resolve().parent.parent
+    pat = re.compile(r"\.(?:write_text|read_text)\(|\bopen\((?!.*encoding=)")
+    bad = [f"{p.relative_to(pkg)}:{i}" for p in pkg.rglob("*.py") if p.name != "test_framework.py"
+           for i, line in enumerate(p.read_text(encoding="utf-8").splitlines(), 1)
+           if pat.search(line) and 'encoding="utf-8"' not in line and "urlopen(" not in line and "z.open(" not in line]
+    assert not bad, bad

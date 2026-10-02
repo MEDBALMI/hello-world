@@ -177,4 +177,4 @@ class PaperBook:
             db.audit(f"paper:{self.name}", "ALERT", f"{a[2]} {a[1]}", {"date": a[0], "detail": a[3]})
 
     def save_state(self, path: Path) -> None:
-        path.write_text(self.state.to_json())
+        path.write_text(self.state.to_json(), encoding="utf-8")

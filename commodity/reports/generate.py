@@ -51,7 +51,7 @@ def write_all(R: dict, outdir: Path) -> list[Path]:
 
     def w(name, body):
         p = outdir / f"{name}_{tag}.md"
-        p.write_text(f"# {name.replace('_', ' ').title()}\n\n{b}{body}")
+        p.write_text(f"# {name.replace('_', ' ').title()}\n\n{b}{body}", encoding="utf-8")
         paths.append(p)
 
     # 01 data health
@@ -205,4 +205,4 @@ def render_registry(path: Path, records: list[dict] | None = None) -> None:
                   "data_required", "test_period", "oos_period", "failure_condition"):
             out.append(f"- **{k.replace('_', ' ').title()}:** {h.get(k)}")
         out.append(f"- **Status:** registry `{h.get('status')}` · last run [{dc}]: machine `{ms}`, final `{s}`\n")
-    path.write_text("\n".join(out))
+    path.write_text("\n".join(out), encoding="utf-8")

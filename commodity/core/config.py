@@ -13,7 +13,7 @@ CONFIG_DIR = PKG_DIR / "config"
 
 @lru_cache(maxsize=None)
 def _load(name: str) -> dict:
-    with open(CONFIG_DIR / name) as fh:
+    with open(CONFIG_DIR / name, encoding="utf-8") as fh:
         return yaml.safe_load(fh)
 
 

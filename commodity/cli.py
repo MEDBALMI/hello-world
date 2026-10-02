@@ -71,7 +71,7 @@ def cmd_run(a) -> dict:
     mcx = P.mcx_study(data, ctx, rs, records)
     from .paper.engine import PaperBook
     import yaml
-    book_cfg = yaml.safe_load((config.CONFIG_DIR / "paper.yaml").read_text())["books"]["reference"]
+    book_cfg = yaml.safe_load((config.CONFIG_DIR / "paper.yaml").read_text(encoding="utf-8"))["books"]["reference"]
     book = PaperBook("reference_" + tag, book_cfg, ctx)
     end = max(c["tradable"]["ROLL_E"].index[-1] for c in ctx.values())
     eq = book.run(end - pd.Timedelta(days=365), end)
@@ -92,7 +92,7 @@ def cmd_run(a) -> dict:
     out = {"tag": tag, "summary": summary, "paper": paper,
            "statuses": {r["id"]: [r.get("machine_status"), r.get("status")] for r in records},
            "validation": pd.Series([v["result"] for v in val]).value_counts().to_dict()}
-    (config.path("reports") / f"run_summary_{tag}.json").write_text(json.dumps(out, indent=2, default=str))
+    (config.path("reports") / f"run_summary_{tag}.json").write_text(json.dumps(out, indent=2, default=str), encoding="utf-8")
     return out
 
 
