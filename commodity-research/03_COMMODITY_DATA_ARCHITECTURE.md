@@ -279,6 +279,9 @@ Why long history: mainly **regime coverage** (crises, rate cycles, structural br
 - Historical margins and price-limit events.
 - Bid-ask samples or intraday bars to calibrate slippage.
 
+### 8.3 Optional (later)
+- Full intraday history; options settlements and IV surfaces (13); ETF holdings; macro vintages (ALFRED); freight, TC/RC, crack spreads; China data; alternative data.
+
 ### 8.4 Statistical-power reporting standard
 Any statement about the sample size needed, t-statistics or power **must state**:
 1. **Observation frequency** (daily, weekly, monthly; overlapping or not).
@@ -296,9 +299,6 @@ Statements that lack these are tagged [VERIFY] or [ILLUSTRATIVE].
 - Under i.i.d., sampling daily instead of monthly does **not** add power for the mean; the calendar span does.
 - Testing many variants raises the required hurdle (multiple-testing literature, e.g. Harvey, Liu & Zhu 2016 [EMPIRICAL, verify]).
 - Pooling across markets increases effective n only to the extent that returns are not correlated (§9).
-
-### 8.3 Optional (later)
-- Full intraday history; options settlements and IV surfaces (13); ETF holdings; macro vintages (ALFRED); freight, TC/RC, crack spreads; China data; alternative data.
 
 ## 9. Is the 11-market universe sufficient for time-series research? (review of earlier statement)
 
@@ -335,6 +335,22 @@ All correlations are [HYPOTHESIS] until measured [OPEN-9.1].
 
 **Conclusion:** sufficient for a rigorous **time-series** program, provided we accept modest diversification, rely on long history, and treat LME data acquisition as a priority decision. It is not suited to cross-sectional commodity strategies as a primary research line.
 
+## 10. Major unresolved data problems
+| ID | Problem |
+|---|---|
+| OPEN-3.1 | Affordable per-contract history with expired contracts and FND/LTD metadata (vendor choice) |
+| OPEN-3.4 / 8.1 | LME data licensing and cost; aluminium benchmark choice; whether to treat zinc/nickel/lead as MCX-only |
+| OPEN-3.6 | MCX bhavcopy depth, format changes, symbol mapping |
+| OPEN-3.7 | MCX tender/delivery-period rules and history |
+| OPEN-3.8 | Comparison of roll rules (exchange-specific, volume-based, OI-based, calendar-based) |
+| OPEN-11.4 | Cross-venue timestamp alignment for type B/C research (LBMA, COMEX, LME, MCX closes) |
+| OPEN-1.1 | Historical margins and price-limit histories |
+| OPEN-6.1 | Historical release *times* for EIA/WGC/customs before electronic archives |
+| OPEN-6.2 | Point-in-time vintages for fundamental series (EIA revisions; ALFRED coverage) |
+| OPEN-8.2 | Slippage calibration without intraday history |
+| OPEN-9.1 | Measured correlation/effective-breadth of the 11 markets (asset and strategy level) |
+| OPEN-1.6 | CFTC COT program changes (2026 review) |
+
 ## 11. Research architecture: research types and venues
 
 ### 11.1 Three research types
@@ -359,19 +375,3 @@ Rules:
   5. **Local contract structure:** expiry dates, tender/delivery periods, compulsory delivery, cash settlement on NYMEX references, lot sizes, mini/micro contracts.
   6. **Local costs:** CTT, stamp duty, exchange/clearing fees, GST, margins, slippage.
 - MCX findings are labelled as *MCX-specific* or *global effect confirmed on MCX*. An effect found only on MCX needs an India-specific economic rationale before it is accepted.
-
-## 10. Major unresolved data problems
-| ID | Problem |
-|---|---|
-| OPEN-3.1 | Affordable per-contract history with expired contracts and FND/LTD metadata (vendor choice) |
-| OPEN-3.4 / 8.1 | LME data licensing and cost; aluminium benchmark choice; whether to treat zinc/nickel/lead as MCX-only |
-| OPEN-3.6 | MCX bhavcopy depth, format changes, symbol mapping |
-| OPEN-3.7 | MCX tender/delivery-period rules and history |
-| OPEN-3.8 | Comparison of roll rules (exchange-specific, volume-based, OI-based, calendar-based) |
-| OPEN-11.4 | Cross-venue timestamp alignment for type B/C research (LBMA, COMEX, LME, MCX closes) |
-| OPEN-1.1 | Historical margins and price-limit histories |
-| OPEN-6.1 | Historical release *times* for EIA/WGC/customs before electronic archives |
-| OPEN-6.2 | Point-in-time vintages for fundamental series (EIA revisions; ALFRED coverage) |
-| OPEN-8.2 | Slippage calibration without intraday history |
-| OPEN-9.1 | Measured correlation/effective-breadth of the 11 markets (asset and strategy level) |
-| OPEN-1.6 | CFTC COT program changes (2026 review) |
