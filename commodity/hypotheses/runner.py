@@ -77,8 +77,8 @@ class Research:
                 vol = feats[r]["atr_pct"] * np.sqrt(252)
             per_root[r] = run_fractional(trd, s, vol, r, target_vol=self.cfg["target_vol"],
                                          max_weight=self.cfg["max_weight"], exec_lag=lag, cost_mult=cost_mult)
-        if not per_root:
-            self.cache[key] = (pd.Series(dtype=float), {})
+        if not per_root:   # e.g. feature not computable on this venue (short MCX curves) -> DATA-LIMITED
+            self.cache[key] = (pd.Series(dtype=float, index=pd.DatetimeIndex([])), {})
             return self.cache[key]
         rets = pd.DataFrame({r: v["ret"] for r, v in per_root.items()})
         port = rets.mean(axis=1, skipna=True)      # equal risk budget across roots (each vol-targeted)

@@ -339,6 +339,9 @@ def mcx_study(data: dict, gctx: dict, rs: runner.Research, records: list[dict]) 
         if not hyp["roots"]:
             continue
         port, _ = mrs.run(hyp, r["chosen_params"])
+        if port.empty:
+            out["strategies"].append({"id": r["id"], "params": r["chosen_params"], "status": "DATA-LIMITED on MCX (feature not computable)"})
+            continue
         out["strategies"].append({"id": r["id"], "params": r["chosen_params"], "global_sharpe_full": r["metrics_full"]["sharpe"],
                                   "global_oos": r["oos_sharpe"], "mcx_sharpe_full": stats.sharpe(port),
                                   "mcx_oos": stats.sharpe(mrs.split(port, "OOS")), "mcx_cost_x2_full":
