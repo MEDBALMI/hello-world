@@ -1,0 +1,35 @@
+# Runtime settings. Override the database with env COMMODITY_DSN.
+database:
+  dsn: "postgresql://postgres@/commodity?host=/tmp&port=5433"
+  schema: commodity
+
+paths:
+  raw: data/raw
+  reports: reports/output
+
+research:
+  # Data splits (documented, fixed before testing). Dates are inclusive.
+  # For synthetic data the same proportions are applied to the generated range.
+  train_frac: 0.50
+  validation_frac: 0.25      # remaining 25% = final out-of-sample hold-out, touched once
+  walk_forward:
+    min_train_years: 8
+    step_years: 2
+  target_vol: 0.10           # per-instrument annualised vol target
+  portfolio_vol: 0.10
+  vol_halflife: 30           # EWMA half-life (days) for vol estimation
+  max_leverage: 3.0          # gross notional / equity cap
+  max_weight: 1.0            # per-instrument notional / equity cap
+  sector_cap: 0.5            # max share of portfolio risk per sector
+  exec_lag: 1                # signal at close t -> trade at close t+exec_lag
+  bootstrap_reps: 500
+  block_len: 20
+  fdr_q: 0.10
+
+acceptance:
+  # thresholds used to assign status (see hypotheses/status.py)
+  min_years: 15
+  min_oos_sharpe: 0.20
+  max_dsr_pvalue: 0.10
+  min_param_stability: 0.6   # share of perturbed parameter sets with Sharpe > 0
+  min_cost_stress_sharpe: 0.0  # Sharpe at 2x costs

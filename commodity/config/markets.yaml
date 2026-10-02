@@ -1,0 +1,242 @@
+# Market configuration. Values tagged VERIFY must be confirmed against the exchange
+# rulebook / MCX circular before real-data research (see commodity-research/17).
+# All rules are versioned through `spec_versions`; P&L uses the version valid on the trade date.
+
+defaults:
+  roll:
+    buffer_bd: 2            # business days before delivery_risk_date that a position must be out
+    days_before: 5          # ROLL_E / forced-roll deadline offset (business days before delivery risk)
+    calendar_bd: 5          # ROLL_A: nth business day of the month before the delivery-risk month
+    crossover_days: 2       # ROLL_B/C/D consecutive days of crossover (lagged data)
+  costs:
+    slippage_ticks: 1       # per side, per contract
+    roll_spread_ticks: 1    # calendar spread cost per roll (one spread trade)
+  margin_pct: 0.08          # rough initial-margin fraction of notional for utilisation stats (VERIFY per market)
+
+markets:
+  # ------------------------------------------------------------ GLOBAL CORE
+  GC:
+    name: COMEX Gold
+    venue: GLOBAL
+    exchange: COMEX
+    calendar: CME
+    sector: PRECIOUS
+    tier: core
+    currency: USD
+    settlement: physical
+    listed_months: [1,2,3,4,5,6,7,8,9,10,11,12]
+    liquid_months: [2,4,6,8,10,12]
+    listing_months_ahead: 24
+    ltd_rule: third_last_bd_of_month          # V-S (COMEX Ch.113)
+    fnd_rule: last_bd_of_prior_month          # V-S (CME gold FAQ)
+    allows_negative: false
+    cftc_code: "088691"                        # VERIFY
+    spec_versions:
+      - {valid_from: 1975-01-01, multiplier: 100, tick: 0.10, commission: 2.50}
+  SI:
+    name: COMEX Silver
+    venue: GLOBAL
+    exchange: COMEX
+    calendar: CME
+    sector: PRECIOUS
+    tier: core
+    currency: USD
+    settlement: physical
+    listed_months: [1,3,5,7,9,12]
+    liquid_months: [3,5,7,9,12]
+    listing_months_ahead: 24
+    ltd_rule: third_last_bd_of_month
+    fnd_rule: last_bd_of_prior_month
+    allows_negative: false
+    cftc_code: "084691"                        # VERIFY
+    spec_versions:
+      - {valid_from: 1975-01-01, multiplier: 5000, tick: 0.005, commission: 2.50}
+  HG:
+    name: COMEX Copper
+    venue: GLOBAL
+    exchange: COMEX
+    calendar: CME
+    sector: INDUSTRIAL
+    tier: core
+    currency: USD
+    settlement: physical
+    listed_months: [1,2,3,4,5,6,7,8,9,10,11,12]
+    liquid_months: [3,5,7,9,12]
+    listing_months_ahead: 24
+    ltd_rule: third_last_bd_of_month           # V-2
+    fnd_rule: last_bd_of_prior_month
+    allows_negative: false
+    cftc_code: "085692"                        # VERIFY
+    spec_versions:
+      - {valid_from: 1988-01-01, multiplier: 25000, tick: 0.0005, commission: 2.50}
+  CL:
+    name: NYMEX WTI Crude Oil
+    venue: GLOBAL
+    exchange: NYMEX
+    calendar: CME
+    sector: ENERGY
+    tier: core
+    currency: USD
+    settlement: physical
+    listed_months: [1,2,3,4,5,6,7,8,9,10,11,12]
+    liquid_months: [1,2,3,4,5,6,7,8,9,10,11,12]
+    listing_months_ahead: 24
+    ltd_rule: cl_rule                          # V-S (NYMEX Ch.200)
+    fnd_rule: none                             # notices follow LTD -> delivery risk = LTD
+    allows_negative: true
+    cftc_code: "067651"                        # VERIFY
+    spec_versions:
+      - {valid_from: 1983-01-01, multiplier: 1000, tick: 0.01, commission: 2.50}
+  NG:
+    name: NYMEX Henry Hub Natural Gas
+    venue: GLOBAL
+    exchange: NYMEX
+    calendar: CME
+    sector: ENERGY
+    tier: core
+    currency: USD
+    settlement: physical
+    listed_months: [1,2,3,4,5,6,7,8,9,10,11,12]
+    liquid_months: [1,2,3,4,5,6,7,8,9,10,11,12]
+    listing_months_ahead: 24
+    ltd_rule: ng_rule                          # V-S (NYMEX Ch.220)
+    fnd_rule: none
+    allows_negative: true
+    seasonal_curve: true
+    cftc_code: "023651"                        # VERIFY
+    spec_versions:
+      - {valid_from: 1990-01-01, multiplier: 10000, tick: 0.001, commission: 2.50}
+  ALI:
+    name: LME Aluminium (3M benchmark)
+    venue: GLOBAL
+    exchange: LME
+    calendar: LME
+    sector: INDUSTRIAL
+    tier: core
+    status: DATA-LIMITED   # licensed data postponed by decision; prompt-date structure (17 s.6)
+    currency: USD
+  # ------------------------------------------------------------ GLOBAL SECONDARY (not yet configured)
+  PL: {name: NYMEX Platinum, venue: GLOBAL, exchange: NYMEX, sector: PRECIOUS, tier: secondary, status: NOT-CONFIGURED}
+  PA: {name: NYMEX Palladium, venue: GLOBAL, exchange: NYMEX, sector: PRECIOUS, tier: secondary, status: NOT-CONFIGURED}
+  ZN_LME: {name: LME Zinc, venue: GLOBAL, exchange: LME, sector: INDUSTRIAL, tier: secondary, status: DATA-LIMITED}
+  NI_LME: {name: LME Nickel, venue: GLOBAL, exchange: LME, sector: INDUSTRIAL, tier: secondary, status: DATA-LIMITED}
+  PB_LME: {name: LME Lead, venue: GLOBAL, exchange: LME, sector: INDUSTRIAL, tier: secondary, status: DATA-LIMITED}
+
+  # ------------------------------------------------------------ MCX (India) — expiry taken from bhavcopy when available
+  MCX_GOLD:
+    name: MCX Gold (1 kg)
+    venue: MCX
+    exchange: MCX
+    calendar: MCX
+    sector: PRECIOUS
+    tier: core
+    currency: INR
+    settlement: physical          # compulsory delivery (V-2)
+    global_root: GC
+    listed_months: [2,4,6,8,10,12]
+    liquid_months: [2,4,6,8,10,12]
+    listing_months_ahead: 12
+    ltd_rule: mcx_day_5            # 5th of contract month or previous trading day (V-2)
+    fnd_rule: mcx_tender_5bd       # ASSUMPTION: tender/delivery-risk 5 bd before expiry (OPEN-3.7)
+    allows_negative: false
+    usd_conversion: 32.1507        # troy oz per kg / 100 (price quoted per 10 g) -> see mcx.py
+    spec_versions:
+      - {valid_from: 2003-11-10, multiplier: 100, tick: 1.0, commission: 20.0}     # VERIFY
+  MCX_SILVER:
+    name: MCX Silver (30 kg)
+    venue: MCX
+    exchange: MCX
+    calendar: MCX
+    sector: PRECIOUS
+    tier: core
+    currency: INR
+    settlement: physical
+    global_root: SI
+    listed_months: [3,5,7,9,12]
+    liquid_months: [3,5,7,9,12]
+    listing_months_ahead: 12
+    ltd_rule: mcx_day_5
+    fnd_rule: mcx_tender_5bd
+    allows_negative: false
+    spec_versions:
+      - {valid_from: 2003-11-10, multiplier: 30, tick: 1.0, commission: 20.0}      # VERIFY
+  MCX_CRUDEOIL:
+    name: MCX Crude Oil (100 bbl)
+    venue: MCX
+    exchange: MCX
+    calendar: MCX
+    sector: ENERGY
+    tier: core
+    currency: INR
+    settlement: cash               # NYMEX CL settle x RBI ref rate (V-S)
+    global_root: CL
+    listed_months: [1,2,3,4,5,6,7,8,9,10,11,12]
+    liquid_months: [1,2,3,4,5,6,7,8,9,10,11,12]
+    listing_months_ahead: 6
+    ltd_rule: mcx_crude            # ~1 bd before NYMEX CL LTD (ASSUMPTION; bhavcopy expiry overrides)
+    fnd_rule: none
+    allows_negative: true
+    spec_versions:
+      - {valid_from: 2005-01-01, multiplier: 100, tick: 1.0, commission: 20.0}     # VERIFY
+  MCX_NATURALGAS:
+    name: MCX Natural Gas (1250 MMBtu)
+    venue: MCX
+    exchange: MCX
+    calendar: MCX
+    sector: ENERGY
+    tier: core
+    currency: INR
+    settlement: cash
+    global_root: NG
+    listed_months: [1,2,3,4,5,6,7,8,9,10,11,12]
+    liquid_months: [1,2,3,4,5,6,7,8,9,10,11,12]
+    listing_months_ahead: 6
+    ltd_rule: mcx_ng               # ~1 bd before NYMEX NG LTD (ASSUMPTION)
+    fnd_rule: none
+    allows_negative: true
+    spec_versions:
+      - {valid_from: 2006-01-01, multiplier: 1250, tick: 0.10, commission: 20.0}   # V-2
+  MCX_COPPER:
+    name: MCX Copper (2.5 t)
+    venue: MCX
+    exchange: MCX
+    calendar: MCX
+    sector: INDUSTRIAL
+    tier: core
+    currency: INR
+    settlement: physical
+    global_root: HG
+    listed_months: [1,2,3,4,5,6,7,8,9,10,11,12]
+    liquid_months: [1,2,3,4,5,6,7,8,9,10,11,12]
+    listing_months_ahead: 4
+    ltd_rule: last_bd_of_month
+    fnd_rule: mcx_tender_5bd
+    allows_negative: false
+    spec_versions:
+      - {valid_from: 2005-01-01, multiplier: 2500, tick: 0.05, commission: 20.0}   # VERIFY
+  MCX_ALUMINIUM:
+    name: MCX Aluminium (5 t)
+    venue: MCX
+    exchange: MCX
+    calendar: MCX
+    sector: INDUSTRIAL
+    tier: core
+    currency: INR
+    settlement: physical
+    global_root: null              # LME benchmark postponed
+    listed_months: [1,2,3,4,5,6,7,8,9,10,11,12]
+    liquid_months: [1,2,3,4,5,6,7,8,9,10,11,12]
+    listing_months_ahead: 4
+    ltd_rule: last_bd_of_month
+    fnd_rule: mcx_tender_5bd
+    allows_negative: false
+    spec_versions:
+      - {valid_from: 2005-01-01, multiplier: 5000, tick: 0.05, commission: 20.0}   # VERIFY
+
+# MCX statutory/transaction charges as fraction of turnover (VERIFY: SEBI/MCX circulars, broker schedule)
+mcx_charges:
+  ctt_sell: 0.0001          # Commodity Transaction Tax 0.01% on sell side, non-agri futures
+  exchange_txn: 0.000021    # exchange transaction charge (approx.)
+  sebi_fee: 0.000001        # Rs 10 per crore
+  stamp_duty_buy: 0.00002   # 0.002% buy side
+  gst_on_fees: 0.18

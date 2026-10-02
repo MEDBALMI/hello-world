@@ -1,0 +1,605 @@
+# Pre-registered hypotheses (documented BEFORE testing). Generated from a reviewed definition;
+# parameter grids are fixed here and nothing outside them may be searched.
+# Splits: TRAIN (first 50%) -> VALIDATION (next 25%) -> OUT-OF-SAMPLE (final 25%, touched once),
+# plus expanding walk-forward on TRAIN+VALIDATION. Research type: A single TS, B cross/RV, C cross-sectional.
+hypotheses:
+- venue: GLOBAL
+  position_size: volatility-targeted (10% annualised per instrument, EWMA hl 30d), capped 1x notional
+  test_period: TRAIN + VALIDATION (first 75% of each root's history); expanding walk-forward
+  oos_period: final 25% of history (hold-out, evaluated once)
+  data_required: individual contracts (settle, OHLC, volume, OI) and contract calendar
+  status: REGISTERED
+  id: H01
+  family: A_TSMOM
+  research_type: A
+  roots: &id001
+  - GC
+  - SI
+  - HG
+  - CL
+  - NG
+  strategy: tsmom
+  grid:
+    lookback:
+    - 126
+    - 252
+  economic_rationale: Slow information diffusion and hedging-pressure persistence produce time-series momentum (Moskowitz, Ooi and Pedersen 2012)
+  feature: trailing return of the chained tradable index
+  signal: sign of trailing return
+  entry: sign change
+  exit: opposite sign
+  expected_effect: positive excess return, positive skew
+  failure_condition: OOS Sharpe <= 0, or DSR p > 0.10, or fails FDR
+- venue: GLOBAL
+  position_size: volatility-targeted (10% annualised per instrument, EWMA hl 30d), capped 1x notional
+  test_period: TRAIN + VALIDATION (first 75% of each root's history); expanding walk-forward
+  oos_period: final 25% of history (hold-out, evaluated once)
+  data_required: individual contracts (settle, OHLC, volume, OI) and contract calendar
+  status: REGISTERED
+  id: H02
+  family: A_TSMOM
+  research_type: A
+  roots: *id001
+  strategy: tsmom_12_1
+  grid: {}
+  economic_rationale: 12-1 momentum skips the last month to avoid short-term reversal
+  feature: 12-month return excluding the last month
+  signal: sign
+  entry: sign change
+  exit: opposite sign
+  expected_effect: similar to H01
+  failure_condition: OOS Sharpe <= 0, or DSR p > 0.10, or fails FDR
+- venue: GLOBAL
+  position_size: volatility-targeted (10% annualised per instrument, EWMA hl 30d), capped 1x notional
+  test_period: TRAIN + VALIDATION (first 75% of each root's history); expanding walk-forward
+  oos_period: final 25% of history (hold-out, evaluated once)
+  data_required: individual contracts (settle, OHLC, volume, OI) and contract calendar
+  status: REGISTERED
+  id: H03
+  family: B_TREND
+  research_type: A
+  roots: *id001
+  strategy: ma_trend
+  grid:
+    n:
+    - 50
+    - 150
+    - 200
+  economic_rationale: Equity moving-average trend filter transfer test; trend persistence in futures
+  feature: distance to n-day moving average of the ratio-equivalent index
+  signal: sign
+  entry: cross above/below the MA
+  exit: opposite cross
+  expected_effect: positive Sharpe
+  failure_condition: OOS Sharpe <= 0, or DSR p > 0.10, or fails FDR
+- venue: GLOBAL
+  position_size: volatility-targeted (10% annualised per instrument, EWMA hl 30d), capped 1x notional
+  test_period: TRAIN + VALIDATION (first 75% of each root's history); expanding walk-forward
+  oos_period: final 25% of history (hold-out, evaluated once)
+  data_required: individual contracts (settle, OHLC, volume, OI) and contract calendar
+  status: REGISTERED
+  id: H04
+  family: B_TREND
+  research_type: A
+  roots: *id001
+  strategy: ma_cross
+  grid:
+    fast:
+    - 50
+    slow:
+    - 150
+    - 200
+  economic_rationale: Golden/death cross transfer test from equities
+  feature: fast vs slow moving average
+  signal: sign of difference
+  entry: cross
+  exit: opposite cross
+  expected_effect: positive Sharpe
+  failure_condition: OOS Sharpe <= 0, or DSR p > 0.10, or fails FDR
+- venue: GLOBAL
+  position_size: volatility-targeted (10% annualised per instrument, EWMA hl 30d), capped 1x notional
+  test_period: TRAIN + VALIDATION (first 75% of each root's history); expanding walk-forward
+  oos_period: final 25% of history (hold-out, evaluated once)
+  data_required: individual contracts (settle, OHLC, volume, OI) and contract calendar
+  status: REGISTERED
+  id: H05
+  family: C_BREAKOUT
+  research_type: A
+  roots: *id001
+  strategy: donchian
+  grid:
+    entry:
+    - 55
+    - 252
+    exit:
+    - 20
+    - 55
+  economic_rationale: Breakouts capture regime shifts in supply/demand (CTA practice; folklore until tested)
+  feature: N-day channel of the index
+  signal: breakout state
+  entry: close beyond N-day high/low
+  exit: M-day opposite channel
+  expected_effect: positive Sharpe
+  failure_condition: OOS Sharpe <= 0, or DSR p > 0.10, or fails FDR
+- venue: GLOBAL
+  position_size: volatility-targeted (10% annualised per instrument, EWMA hl 30d), capped 1x notional
+  test_period: TRAIN + VALIDATION (first 75% of each root's history); expanding walk-forward
+  oos_period: final 25% of history (hold-out, evaluated once)
+  data_required: individual contracts (settle, OHLC, volume, OI) and contract calendar
+  status: REGISTERED
+  id: H06
+  family: C_BREAKOUT
+  research_type: A
+  roots: *id001
+  strategy: vol_breakout
+  grid:
+    k:
+    - 1.0
+    - 1.5
+    - 2.0
+    hold:
+    - 5
+    - 10
+  economic_rationale: Large ATR-scaled moves signal information arrival that continues
+  feature: 1-day return divided by ATR%
+  signal: direction of the shock
+  entry: abs(return) > k x ATR
+  exit: time stop (hold days)
+  expected_effect: short-horizon continuation
+  failure_condition: OOS Sharpe <= 0, or DSR p > 0.10, or fails FDR
+- venue: GLOBAL
+  position_size: volatility-targeted (10% annualised per instrument, EWMA hl 30d), capped 1x notional
+  test_period: TRAIN + VALIDATION (first 75% of each root's history); expanding walk-forward
+  oos_period: final 25% of history (hold-out, evaluated once)
+  data_required: individual contracts (settle, OHLC, volume, OI) and contract calendar
+  status: REGISTERED
+  id: H07
+  family: A_TSMOM
+  research_type: A
+  roots: *id001
+  strategy: roc
+  grid:
+    lookback:
+    - 21
+    - 63
+  economic_rationale: Shorter-horizon momentum
+  feature: rate of change
+  signal: sign
+  entry: sign change
+  exit: opposite sign
+  expected_effect: weaker than 12-month momentum
+  failure_condition: OOS Sharpe <= 0, or DSR p > 0.10, or fails FDR
+- venue: GLOBAL
+  position_size: volatility-targeted (10% annualised per instrument, EWMA hl 30d), capped 1x notional
+  test_period: TRAIN + VALIDATION (first 75% of each root's history); expanding walk-forward
+  oos_period: final 25% of history (hold-out, evaluated once)
+  data_required: individual contracts (settle, OHLC, volume, OI) and contract calendar
+  status: REGISTERED
+  id: H08
+  family: Q_EQUITY_TRANSFER
+  research_type: A
+  roots: *id001
+  strategy: trend_template
+  grid: {}
+  economic_rationale: Minervini trend template transfer test (long-only). The equity mechanism (institutional accumulation, earnings drift) has no direct commodity analogue
+  feature: MA stack + 52-week high/low proximity
+  signal: 1 when template is true
+  entry: template true
+  exit: template false
+  expected_effect: unknown
+  failure_condition: OOS Sharpe <= 0, or DSR p > 0.10, or fails FDR, or no better than H03
+- venue: GLOBAL
+  position_size: volatility-targeted (10% annualised per instrument, EWMA hl 30d), capped 1x notional
+  test_period: TRAIN + VALIDATION (first 75% of each root's history); expanding walk-forward
+  oos_period: final 25% of history (hold-out, evaluated once)
+  data_required: individual contracts (settle, OHLC, volume, OI) and contract calendar
+  status: REGISTERED
+  id: H09
+  family: Q_EQUITY_TRANSFER
+  research_type: A
+  roots: *id001
+  strategy: vcp_breakout
+  grid:
+    entry:
+    - 55
+  economic_rationale: 'VCP transfer test: volatility contraction then breakout (long-only). In supply-shock markets volatility often expands with rallies'
+  feature: three successively tighter ranges near the 52-week high
+  signal: long on 55-day breakout
+  entry: breakout after contraction
+  exit: close below 50-day MA
+  expected_effect: unknown
+  failure_condition: OOS Sharpe <= 0, or DSR p > 0.10, or fails FDR, or no better than H05
+- venue: GLOBAL
+  position_size: volatility-targeted (10% annualised per instrument, EWMA hl 30d), capped 1x notional
+  test_period: TRAIN + VALIDATION (first 75% of each root's history); expanding walk-forward
+  oos_period: final 25% of history (hold-out, evaluated once)
+  data_required: individual contracts (settle, OHLC, volume, OI) and contract calendar
+  status: REGISTERED
+  id: H10
+  family: D_MEAN_REVERSION
+  research_type: A
+  roots: *id001
+  strategy: mean_reversion
+  grid:
+    z:
+    - 1.5
+    - 2.0
+    - 2.5
+    hold:
+    - 5
+  economic_rationale: Liquidity-provision reversal after extreme short-term moves (weak prior for futures)
+  feature: 5-day return z-score
+  signal: fade the extreme
+  entry: abs(z) > threshold
+  exit: 5-day time stop
+  expected_effect: small positive at short horizon
+  failure_condition: OOS Sharpe <= 0, or DSR p > 0.10, or fails FDR
+- venue: GLOBAL
+  position_size: volatility-targeted (10% annualised per instrument, EWMA hl 30d), capped 1x notional
+  test_period: TRAIN + VALIDATION (first 75% of each root's history); expanding walk-forward
+  oos_period: final 25% of history (hold-out, evaluated once)
+  data_required: individual contracts (settle, OHLC, volume, OI) and contract calendar
+  status: REGISTERED
+  id: H11
+  family: F_CARRY
+  research_type: A
+  roots: *id001
+  strategy: carry
+  grid:
+    col:
+    - carry
+    - carry_12m
+  economic_rationale: 'Theory of storage / hedging pressure: backwardation signals scarcity and pays roll yield (Koijen et al. 2018; Gorton, Hayashi and Rouwenhorst 2013)'
+  feature: annualised nearby carry (TS1) or seasonal-neutral 12-month carry (TS9)
+  signal: long backwardation, short contango
+  entry: carry sign change
+  exit: opposite sign
+  expected_effect: positive in energy/base metals; about zero in gold where carry is mechanical
+  failure_condition: OOS Sharpe <= 0, or DSR p > 0.10, or fails FDR
+- venue: GLOBAL
+  position_size: volatility-targeted (10% annualised per instrument, EWMA hl 30d), capped 1x notional
+  test_period: TRAIN + VALIDATION (first 75% of each root's history); expanding walk-forward
+  oos_period: final 25% of history (hold-out, evaluated once)
+  data_required: individual contracts (settle, OHLC, volume, OI) and contract calendar
+  status: REGISTERED
+  id: H12
+  family: E_TERM_STRUCTURE
+  research_type: A
+  roots: *id001
+  strategy: carry_z
+  grid:
+    threshold:
+    - 0.0
+    - 1.0
+  economic_rationale: Carry relative to its own history captures changes in tightness (TS6)
+  feature: carry z-score (252 days)
+  signal: sign beyond threshold
+  entry: abs(z) > threshold
+  exit: abs(z) < threshold
+  expected_effect: positive
+  failure_condition: OOS Sharpe <= 0, or DSR p > 0.10, or fails FDR
+- venue: GLOBAL
+  position_size: volatility-targeted (10% annualised per instrument, EWMA hl 30d), capped 1x notional
+  test_period: TRAIN + VALIDATION (first 75% of each root's history); expanding walk-forward
+  oos_period: final 25% of history (hold-out, evaluated once)
+  data_required: individual contracts (settle, OHLC, volume, OI) and contract calendar
+  status: REGISTERED
+  id: H13
+  family: G_MOM_CARRY
+  research_type: A
+  roots: *id001
+  strategy: mom_carry
+  grid:
+    lookback:
+    - 126
+    - 252
+  economic_rationale: Momentum and carry are distinct premia; agreement filters noise
+  feature: momentum sign and carry sign
+  signal: trade only when both agree
+  entry: agreement
+  exit: disagreement
+  expected_effect: higher Sharpe than either alone
+  failure_condition: OOS Sharpe <= 0, or DSR p > 0.10, or fails FDR, or not better than H01 and H11 out-of-sample
+- venue: GLOBAL
+  position_size: volatility-targeted (10% annualised per instrument, EWMA hl 30d), capped 1x notional
+  test_period: TRAIN + VALIDATION (first 75% of each root's history); expanding walk-forward
+  oos_period: final 25% of history (hold-out, evaluated once)
+  data_required: individual contracts (settle, OHLC, volume, OI) and contract calendar
+  status: REGISTERED
+  id: H14
+  family: H_TREND_CARRY
+  research_type: A
+  roots: *id001
+  strategy: trend_carry_filter
+  grid:
+    n:
+    - 150
+    - 200
+  economic_rationale: Avoid trend trades fighting strong carry (roll-yield drag)
+  feature: MA trend + carry beyond 10%
+  signal: trend unless carry strongly opposite
+  entry: trend
+  exit: trend reversal or carry conflict
+  expected_effect: improves H03
+  failure_condition: OOS Sharpe <= 0, or DSR p > 0.10, or fails FDR, or not better than H03
+- venue: GLOBAL
+  position_size: volatility-targeted (10% annualised per instrument, EWMA hl 30d), capped 1x notional
+  test_period: TRAIN + VALIDATION (first 75% of each root's history); expanding walk-forward
+  oos_period: final 25% of history (hold-out, evaluated once)
+  data_required: CFTC disaggregated COT aligned to release (Friday 15:30 ET -> next session)
+  status: REGISTERED
+  id: H15
+  family: I_POSITIONING
+  research_type: A
+  roots: *id001
+  strategy: cot_contrarian
+  grid:
+    hi:
+    - 0.9
+    - 0.95
+    lo:
+    - 0.1
+    - 0.05
+  economic_rationale: Crowded managed-money positioning reverses (market belief; mixed evidence)
+  feature: managed-money net / OI, 3-year percentile
+  signal: fade extremes
+  entry: percentile beyond bounds
+  exit: back inside bounds
+  expected_effect: unknown sign
+  failure_condition: OOS Sharpe <= 0, or DSR p > 0.10, or fails FDR
+- venue: GLOBAL
+  position_size: volatility-targeted (10% annualised per instrument, EWMA hl 30d), capped 1x notional
+  test_period: TRAIN + VALIDATION (first 75% of each root's history); expanding walk-forward
+  oos_period: final 25% of history (hold-out, evaluated once)
+  data_required: CFTC disaggregated COT
+  status: REGISTERED
+  id: H16
+  family: I_POSITIONING
+  research_type: A
+  roots: *id001
+  strategy: cot_momentum
+  grid: {}
+  economic_rationale: Speculator flows are trend-following; positioning changes persist
+  feature: 4-week change in managed-money net
+  signal: sign
+  entry: sign change
+  exit: opposite sign
+  expected_effect: unknown
+  failure_condition: OOS Sharpe <= 0, or DSR p > 0.10, or fails FDR
+- venue: GLOBAL
+  position_size: volatility-targeted (10% annualised per instrument, EWMA hl 30d), capped 1x notional
+  test_period: TRAIN + VALIDATION (first 75% of each root's history); expanding walk-forward
+  oos_period: final 25% of history (hold-out, evaluated once)
+  data_required: CFTC disaggregated COT
+  status: REGISTERED
+  id: H17
+  family: I_POSITIONING
+  research_type: A
+  roots: *id001
+  strategy: trend_cot
+  grid:
+    hi:
+    - 0.9
+  economic_rationale: Avoid trend trades when positioning is already crowded in the trend direction
+  feature: MA200 trend + managed-money percentile
+  signal: trend unless crowded
+  entry: trend
+  exit: reversal or crowding
+  expected_effect: improves H03 drawdowns
+  failure_condition: OOS Sharpe <= 0, or DSR p > 0.10, or fails FDR, or not better than H03
+- venue: GLOBAL
+  position_size: volatility-targeted (10% annualised per instrument, EWMA hl 30d), capped 1x notional
+  test_period: TRAIN + VALIDATION (first 75% of each root's history); expanding walk-forward
+  oos_period: final 25% of history (hold-out, evaluated once)
+  data_required: FRED DFII10 with availability timestamps
+  status: REGISTERED
+  id: H18
+  family: K_MACRO
+  research_type: B
+  roots:
+  - GC
+  strategy: macro_real_yield
+  grid: {}
+  economic_rationale: Real yields are gold's opportunity cost (Erb and Harvey 2013); test whether CHANGES are predictive, not only contemporaneous
+  feature: 63-day change in 10y TIPS real yield
+  signal: long gold after a real-yield decline
+  entry: sign change
+  exit: opposite sign
+  expected_effect: positive only if a lagged relation exists
+  failure_condition: OOS Sharpe <= 0, or DSR p > 0.10, or fails FDR
+- venue: GLOBAL
+  position_size: volatility-targeted (10% annualised per instrument, EWMA hl 30d), capped 1x notional
+  test_period: TRAIN + VALIDATION (first 75% of each root's history); expanding walk-forward
+  oos_period: final 25% of history (hold-out, evaluated once)
+  data_required: FRED DTWEXBGS
+  status: REGISTERED
+  id: H19
+  family: K_MACRO
+  research_type: B
+  roots:
+  - GC
+  - HG
+  - CL
+  strategy: macro_usd
+  grid: {}
+  economic_rationale: Commodities are priced in USD; a weaker USD raises non-US demand
+  feature: 63-day change in the broad USD index
+  signal: long after USD decline
+  entry: sign change
+  exit: opposite sign
+  expected_effect: regime-dependent
+  failure_condition: OOS Sharpe <= 0, or DSR p > 0.10, or fails FDR
+- venue: GLOBAL
+  position_size: volatility-targeted (10% annualised per instrument, EWMA hl 30d), capped 1x notional
+  test_period: TRAIN + VALIDATION (first 75% of each root's history); expanding walk-forward
+  oos_period: final 25% of history (hold-out, evaluated once)
+  data_required: individual contracts (settle, OHLC, volume, OI) and contract calendar
+  status: REGISTERED
+  id: H20
+  family: M_VOL_REGIME
+  research_type: A
+  roots: *id001
+  strategy: vol_regime_trend
+  grid:
+    n:
+    - 200
+    mult:
+    - 1.25
+    - 1.5
+  economic_rationale: Trend signals are noisier in volatility spikes; halve exposure
+  feature: EWMA vol vs its 1-year median
+  signal: MA trend scaled by 0.5 in high vol
+  entry: trend
+  exit: reversal
+  expected_effect: lower drawdown than H03
+  failure_condition: OOS Sharpe <= 0, or DSR p > 0.10, or fails FDR, or not better than H03 risk-adjusted
+- venue: GLOBAL
+  position_size: volatility-targeted (10% annualised per instrument, EWMA hl 30d), capped 1x notional
+  test_period: TRAIN + VALIDATION (first 75% of each root's history); expanding walk-forward
+  oos_period: final 25% of history (hold-out, evaluated once)
+  data_required: individual contracts (settle, OHLC, volume, OI) and contract calendar
+  status: REGISTERED
+  id: H21
+  family: P_SEASONALITY
+  research_type: A
+  roots: *id001
+  strategy: seasonal
+  grid: {}
+  economic_rationale: Seasonal demand (heating, driving, Indian festival gold) - but should be priced into the curve
+  feature: mean same-month return of PRIOR years
+  signal: sign
+  entry: month start
+  exit: month end
+  expected_effect: about zero (null expected)
+  failure_condition: OOS Sharpe <= 0, or DSR p > 0.10, or fails FDR
+- venue: GLOBAL
+  position_size: volatility-targeted (10% annualised per instrument, EWMA hl 30d), capped 1x notional
+  test_period: TRAIN + VALIDATION (first 75% of each root's history); expanding walk-forward
+  oos_period: final 25% of history (hold-out, evaluated once)
+  data_required: individual contracts (settle, OHLC, volume, OI) and contract calendar
+  status: REGISTERED
+  id: H22
+  family: P_SEASONALITY
+  research_type: A
+  roots: *id001
+  strategy: seasonal_trend
+  grid:
+    n:
+    - 200
+  economic_rationale: Seasonality only when confirmed by trend
+  feature: seasonal sign + MA trend
+  signal: trade only when they agree
+  entry: agreement
+  exit: disagreement
+  expected_effect: small
+  failure_condition: OOS Sharpe <= 0, or DSR p > 0.10, or fails FDR
+- venue: GLOBAL
+  position_size: volatility-targeted (10% annualised per instrument, EWMA hl 30d), capped 1x notional
+  test_period: TRAIN + VALIDATION (first 75% of each root's history); expanding walk-forward
+  oos_period: final 25% of history (hold-out, evaluated once)
+  data_required: individual contracts (settle, OHLC, volume, OI) and contract calendar
+  status: REGISTERED
+  id: H23
+  family: N_MULTI_FACTOR
+  research_type: A
+  roots: *id001
+  strategy: multi_factor
+  grid: {}
+  economic_rationale: Diversify across trend, carry and positioning premia
+  feature: average of momentum, carry and COT-contrarian signs
+  signal: average in [-1, 1]
+  entry: continuous
+  exit: continuous
+  expected_effect: higher Sharpe than components
+  failure_condition: OOS Sharpe <= 0, or DSR p > 0.10, or fails FDR, or not better than the best single component
+- venue: GLOBAL
+  position_size: volatility-targeted (10% annualised per instrument, EWMA hl 30d), capped 1x notional
+  test_period: TRAIN + VALIDATION (first 75% of each root's history); expanding walk-forward
+  oos_period: final 25% of history (hold-out, evaluated once)
+  data_required: individual contracts (settle, OHLC, volume, OI) and contract calendar
+  status: REGISTERED
+  id: H24
+  family: L_RELATIVE_VALUE
+  research_type: B
+  roots:
+  - GC
+  - SI
+  strategy: gold_silver_rv
+  grid:
+    z_in:
+    - 1.5
+    - 2.0
+    z_out:
+    - 0.5
+  economic_rationale: Gold/silver ratio mean-reverts because both share monetary drivers (cointegration is not predictability - test it)
+  feature: z-score of the log ratio of tradable indices
+  signal: short rich leg / long cheap leg
+  entry: abs(z) > z_in
+  exit: abs(z) < z_out
+  expected_effect: positive if the ratio mean-reverts
+  failure_condition: OOS Sharpe <= 0, or DSR p > 0.10, or fails FDR
+  multi: true
+- venue: GLOBAL
+  position_size: volatility-targeted (10% annualised per instrument, EWMA hl 30d), capped 1x notional
+  test_period: TRAIN + VALIDATION (first 75% of each root's history); expanding walk-forward
+  oos_period: final 25% of history (hold-out, evaluated once)
+  data_required: individual contracts (settle, OHLC, volume, OI) and contract calendar
+  status: REGISTERED
+  id: H25
+  family: C_XS_SELECTION
+  research_type: C
+  roots: *id001
+  strategy: xs_momentum
+  grid:
+    n_long:
+    - 2
+    n_short:
+    - 2
+  economic_rationale: Cross-sectional momentum (Miffre and Rallis 2007) - low breadth here (03 s.9); architecture test
+  feature: 12-month return rank
+  signal: long top 2 / short bottom 2
+  entry: rank
+  exit: rank change
+  expected_effect: weak due to breadth
+  failure_condition: OOS Sharpe <= 0, or DSR p > 0.10, or fails FDR
+  multi: true
+- venue: GLOBAL
+  position_size: volatility-targeted (10% annualised per instrument, EWMA hl 30d), capped 1x notional
+  test_period: TRAIN + VALIDATION (first 75% of each root's history); expanding walk-forward
+  oos_period: final 25% of history (hold-out, evaluated once)
+  data_required: EIA weekly crude stocks / NG storage with release timestamps (needs network or EIA API key)
+  status: DATA-LIMITED
+  id: H26
+  family: J_INVENTORY
+  research_type: A
+  roots:
+  - CL
+  - NG
+  strategy: null
+  grid: {}
+  economic_rationale: Inventory deviations from seasonal norms move prices and the curve (theory of storage)
+  feature: inventory deviation from 5-year seasonal mean
+  signal: low inventory -> long
+  entry: release + 1 session
+  exit: next release
+  expected_effect: positive
+  failure_condition: OOS Sharpe <= 0, or DSR p > 0.10, or fails FDR
+- venue: GLOBAL
+  position_size: volatility-targeted (10% annualised per instrument, EWMA hl 30d), capped 1x notional
+  test_period: TRAIN + VALIDATION (first 75% of each root's history); expanding walk-forward
+  oos_period: final 25% of history (hold-out, evaluated once)
+  data_required: individual contracts (settle, OHLC, volume, OI) and contract calendar
+  status: DESIGN-LIMITED
+  id: H27
+  family: Q_EQUITY_TRANSFER
+  research_type: A
+  roots: *id001
+  strategy: null
+  grid: {}
+  economic_rationale: Cup & Handle transfer test
+  feature: no validated objective detector yet (VCP proxy H09 is the closest tested pattern)
+  signal: n/a
+  entry: n/a
+  exit: n/a
+  expected_effect: unknown
+  failure_condition: n/a

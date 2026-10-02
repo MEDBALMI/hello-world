@@ -1,0 +1,17 @@
+# Paper-trading books. NO broker connection; fills are simulated at the next settlement.
+# Strategy lists must contain only hypotheses with status PRODUCTION-CANDIDATE on REAL data.
+# Until such exist, the 'reference' book runs a fixed engineering reference set (clearly labelled).
+books:
+  reference:
+    label: "ENGINEERING REFERENCE BOOK - not a validated strategy"
+    capital: 10000000
+    currency: USD
+    roll_rule: ROLL_E
+    target_vol: 0.10
+    max_leverage: 3.0
+    drawdown_alert: 0.10
+    roll_alert_bd: 3
+    strategies:
+      - {id: H01, params: {lookback: 252}}
+      - {id: H11, params: {col: carry}}
+    roots: [GC, SI, HG, CL, NG]
