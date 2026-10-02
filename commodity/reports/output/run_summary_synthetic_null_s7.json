@@ -1,0 +1,148 @@
+{
+  "tag": "synthetic_null_s7",
+  "summary": {
+    "n_hypotheses_registered": 27,
+    "n_hypotheses_tested": 25,
+    "n_parameter_combinations": 48,
+    "effective_independent_trials": 5,
+    "mean_abs_trial_correlation": 0.19925167590953158,
+    "trial_sharpe_variance": 0.04612705965035609,
+    "reality_check_p": 0.77,
+    "reality_check_best": "H11|{\"col\": \"carry_12m\"}",
+    "machine_status_counts": {
+      "REJECTED": 21,
+      "WEAK": 4,
+      "DATA-LIMITED": 1,
+      "DESIGN-LIMITED": 1
+    },
+    "splits": {
+      "start": "1995-01-03",
+      "train_end": "2010-06-29",
+      "val_end": "2018-03-29",
+      "end": "2025-12-31"
+    }
+  },
+  "paper": {
+    "days": 252,
+    "final_equity": 9720372.5,
+    "n_trades": 433,
+    "n_alerts": 75,
+    "alert_types": {
+      "ROLL_DUE": 75
+    }
+  },
+  "statuses": {
+    "H01": [
+      "REJECTED",
+      "NOT-RESEARCH (SYNTHETIC)"
+    ],
+    "H02": [
+      "REJECTED",
+      "NOT-RESEARCH (SYNTHETIC)"
+    ],
+    "H03": [
+      "REJECTED",
+      "NOT-RESEARCH (SYNTHETIC)"
+    ],
+    "H04": [
+      "REJECTED",
+      "NOT-RESEARCH (SYNTHETIC)"
+    ],
+    "H05": [
+      "WEAK",
+      "NOT-RESEARCH (SYNTHETIC)"
+    ],
+    "H06": [
+      "WEAK",
+      "NOT-RESEARCH (SYNTHETIC)"
+    ],
+    "H07": [
+      "REJECTED",
+      "NOT-RESEARCH (SYNTHETIC)"
+    ],
+    "H08": [
+      "REJECTED",
+      "NOT-RESEARCH (SYNTHETIC)"
+    ],
+    "H09": [
+      "REJECTED",
+      "NOT-RESEARCH (SYNTHETIC)"
+    ],
+    "H10": [
+      "WEAK",
+      "NOT-RESEARCH (SYNTHETIC)"
+    ],
+    "H11": [
+      "WEAK",
+      "NOT-RESEARCH (SYNTHETIC)"
+    ],
+    "H12": [
+      "REJECTED",
+      "NOT-RESEARCH (SYNTHETIC)"
+    ],
+    "H13": [
+      "REJECTED",
+      "NOT-RESEARCH (SYNTHETIC)"
+    ],
+    "H14": [
+      "REJECTED",
+      "NOT-RESEARCH (SYNTHETIC)"
+    ],
+    "H15": [
+      "REJECTED",
+      "NOT-RESEARCH (SYNTHETIC)"
+    ],
+    "H16": [
+      "REJECTED",
+      "NOT-RESEARCH (SYNTHETIC)"
+    ],
+    "H17": [
+      "REJECTED",
+      "NOT-RESEARCH (SYNTHETIC)"
+    ],
+    "H18": [
+      "REJECTED",
+      "NOT-RESEARCH (SYNTHETIC)"
+    ],
+    "H19": [
+      "REJECTED",
+      "NOT-RESEARCH (SYNTHETIC)"
+    ],
+    "H20": [
+      "REJECTED",
+      "NOT-RESEARCH (SYNTHETIC)"
+    ],
+    "H21": [
+      "REJECTED",
+      "NOT-RESEARCH (SYNTHETIC)"
+    ],
+    "H22": [
+      "REJECTED",
+      "NOT-RESEARCH (SYNTHETIC)"
+    ],
+    "H23": [
+      "REJECTED",
+      "NOT-RESEARCH (SYNTHETIC)"
+    ],
+    "H24": [
+      "REJECTED",
+      "NOT-RESEARCH (SYNTHETIC)"
+    ],
+    "H25": [
+      "REJECTED",
+      "NOT-RESEARCH (SYNTHETIC)"
+    ],
+    "H26": [
+      "DATA-LIMITED",
+      "NOT-RESEARCH (SYNTHETIC)"
+    ],
+    "H27": [
+      "DESIGN-LIMITED",
+      "NOT-RESEARCH (SYNTHETIC)"
+    ]
+  },
+  "validation": {
+    "PASS": 65,
+    "OPEN": 5
+  }
+}

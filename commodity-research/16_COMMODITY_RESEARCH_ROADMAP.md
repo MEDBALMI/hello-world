@@ -9,8 +9,9 @@
 | 2 | 3 Futures market structure | 02-B | ✅ v1.0. Research series vs P&L series separated; ROLL-A = initial research assumption |
 | 3 | 18 Data architecture (design) | 03 | ✅ v1.0 design. Handling rules, timestamp framework, minimum data, universe review |
 | 4 | 14 Term structure (construction) | 11 | ✅ v0.1. Feature definitions only |
-| **5 (current)** | **Phase 4: data acquisition & validation** | **17**, 03 §3.2b/§7, SOURCE_REGISTER | ✅ desk research v0.1. **Next actions (no purchase without approval):** (a) obtain quotes/trials: DataMine EOD, Norgate, CSI, Databento (OPEN-17.1); (b) MCX bhavcopy audit: earliest date, fields, symbol changes (OPEN-17.3); (c) LME aluminium go/no-go (OPEN-3.4, 17.5). **Gate:** one L4 source per market passes acceptance tests 1–7 (17 §7) |
-| 6 | **Data pilot (validation only, no strategies)** | small DB build for GC, CL, MCX GOLD | **Gate:** validation rules V1–V8 pass; naive-vs-chained bias measured (OPEN-3.3); roll offsets calibrated (OPEN-3.2); first roll-rule comparison (OPEN-3.8) |
+| 5 | **Phase 4: data acquisition & validation** | **17**, 03 §3.2b/§7, SOURCE_REGISTER | ✅ desk research v0.1. **Next actions (no purchase without approval):** (a) obtain quotes/trials: DataMine EOD, Norgate, CSI, Databento (OPEN-17.1); (b) MCX bhavcopy audit: earliest date, fields, symbol changes (OPEN-17.3); (c) LME aluminium go/no-go (OPEN-3.4, 17.5). **Gate:** one L4 source per market passes acceptance tests 1–7 (17 §7) |
+| 5b | **Implementation (master execution prompt)** | `../commodity/` | ✅ full framework built and verified on synthetic data (NULL + planted-CARRY scenarios). See final report |
+| **6 (current, blocked)** | **Real-data pilot** | run `ingest-*` jobs where network is open; then `run --source db` | **Blocked:** data hosts unreachable from build environment; paid sources need approval | **Gate:** validation rules V1–V8 pass; naive-vs-chained bias measured (OPEN-3.3); roll offsets calibrated (OPEN-3.2); first roll-rule comparison (OPEN-3.8) |
 | 7 | 13 Positioning, 12 Seasonality (method sections) | 10, 12 | COT alignment implemented per 03 §6 |
 | 8 | Core modules: Gold → Crude → Copper → Silver → NatGas → Aluminium | 04–09 | Each lists hypotheses + data needs + timestamp table |
 | 9 | Cross-commodity (11), technical transfer (15) | 04–09, 15 | |

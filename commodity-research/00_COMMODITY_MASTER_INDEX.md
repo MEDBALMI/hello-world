@@ -3,7 +3,7 @@
 **Objective:** build institutional-quality understanding of metals and energy futures (global + MCX), then develop and rigorously test hypotheses. **Not** a strategy search.
 
 **Pipeline:** Knowledge → Market structure → Data → Hypotheses → Historical testing → Robustness → OOS → Paper trading → Live.
-**Current stage:** Quantitative foundation complete (Phases 1–3, data architecture design). Phase 4 (data acquisition) desk research done (17); awaiting review before quotes/trials and the validation pilot. No data downloaded, no backtests, no strategies.
+**Current stage:** Framework IMPLEMENTED (`../commodity/`): database, ingestion adapters, roll/curve/feature engines, validation T1–T14, hypothesis/backtest/robustness/OOS engines, portfolio, MCX analysis, paper trading, reports. Verified end-to-end on synthetic data only. **Blocked on real data:** all market-data hosts are unreachable from the build environment; paid data needs approval. See COMMODITY_RESEARCH_FINAL_REPORT.md.
 
 ## Scope
 | Tier | Commodities |
@@ -72,6 +72,10 @@ Venues: **Global** = primary for discovering general effects. **MCX** = tested i
 | 15_COMMODITY_HYPOTHESES.md | 19, 11, 15 | Not started |
 | [16_COMMODITY_RESEARCH_ROADMAP.md](16_COMMODITY_RESEARCH_ROADMAP.md) | 20 | v0.3 |
 | [17_COMMODITY_DATA_SOURCES.md](17_COMMODITY_DATA_SOURCES.md) | 4 (data acquisition) | v0.1 desk research; decision matrix |
+| [15_COMMODITY_HYPOTHESES.md](15_COMMODITY_HYPOTHESES.md) | 19 | generated from `commodity/config/hypotheses.yaml` (27 pre-registered) |
+| [18_COMMODITY_MODULE_SPECS.md](18_COMMODITY_MODULE_SPECS.md) | 5–10 | driver → feature → data-status matrix per core commodity |
+| [COMMODITY_RESEARCH_FINAL_REPORT.md](COMMODITY_RESEARCH_FINAL_REPORT.md) | all | implementation + engineering-validation results |
+| [`../commodity/`](../commodity/README.md) | implementation | code, config, tests, reports/output |
 | [SOURCE_REGISTER.md](SOURCE_REGISTER.md) | all | v0.1 |
 | [RESEARCH_LOG.md](RESEARCH_LOG.md) | all | ongoing |
 

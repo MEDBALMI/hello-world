@@ -4,6 +4,37 @@ Chronological record of what was done, decided, and left open. Newest first.
 
 ---
 
+## 2026-10-02 — Session 5: master execution — implementation + engineering validation
+
+**Environment finding:** every market-data host (CME, CFTC, EIA, FRED, MCX, LME, LBMA, Yahoo, Stooq) is blocked from the build container; only PyPI/GitHub are reachable. No real-market results can be produced here. Nothing has been fabricated.
+
+**Implemented (`../commodity/`):**
+- Versioned market/spec config and rule-based expiry calendars (verified CLF24, CLZ23, NGF24, GCG24 and MCX crude dates).
+- PostgreSQL schema covering the user's table list, with provenance and idempotent COPY upserts.
+- Ingestion adapters: MCX bhavcopy, vendor CSV, CFTC, FRED, EIA contracts 1–4 → contract identities.
+- Roll engine A–F; tradable returns; Panama and ratio views.
+- Curve and feature engines, with availability-aligned COT and macro joins.
+- Validation T1–T14.
+- 27 pre-registered hypotheses.
+- Research runner, robustness, DSR / permutation / FDR / reality check.
+- Portfolio construction, MCX study, paper trading, 12 reports, CLI, 25 tests.
+
+**Engineering validation (synthetic, 1995–2025, GC/SI/HG/CL/NG + 6 MCX roots):**
+- NULL seeds 7 and 21: 0 hypotheses accepted (see final report).
+- CARRY seed 7: H11 detected (DSR p 0.003). Unrelated families rejected.
+
+**Defects found and fixed by the runs:**
+1. Convexity drift in the null generator.
+2. Near-zero synthetic prices that T3/T9 missed (added the extreme-move / near-zero check, with a known-events whitelist for WTI 2020-04-20).
+3. Unstable risk-parity solver (replaced by coordinate descent).
+4. NaN in JSON persistence.
+5. Circular-shift permutation is invalid for persistent signals (block sign-flip instead).
+6. DSR now uses effective trials.
+
+**Requires user approval:** paid per-contract history (DataMine / Norgate / CSI), LME licence, EIA API key (optional), and network access to data hosts.
+
+---
+
 ## 2026-10-02 — Session 4: Phase 4 data acquisition & validation (desk research)
 
 **Done**
