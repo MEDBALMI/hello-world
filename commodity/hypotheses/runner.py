@@ -172,19 +172,29 @@ class Research:
         rec["perm_p"] = self.permutation(per_root)
         return rec
 
-    def permutation(self, per_root, reps=200):
-        rets = {r: self.split(v["pnl"], "TRAINVAL") for r, v in per_root.items()}
-        held = {r: v["held"].reindex(rets[r].index).fillna(0) for r, v in per_root.items()}
-        trd_r = {r: self.split(self.ctx[r]["tradable"][self.rule]["gross_return"], "TRAINVAL") for r in per_root}
-        def pooled(shift):
-            parts = [pd.Series(np.roll(held[r].values, shift), index=held[r].index).shift(1).fillna(0) * trd_r[r].reindex(held[r].index).fillna(0) for r in per_root]
-            return stats.sharpe(pd.concat(parts, axis=1).mean(axis=1))
+    def permutation(self, per_root, reps=200, block=63):
+        """Block sign-flip test: multiply each root's position series by random +/-1 signs held constant
+        over blocks of `block` days. Keeps position persistence/turnover but breaks any link between
+        signal and returns. (A circular shift is NOT a valid null for persistent signals such as carry:
+        shifted positions stay correlated with the current signal.)"""
+        held = {r: self.split(v["held"], "TRAINVAL") for r, v in per_root.items()}
+        trd_r = {r: self.split(self.ctx[r]["tradable"][self.rule]["gross_return"], "TRAINVAL").reindex(held[r].index).fillna(0)
+                 for r in per_root}
         n = min(len(h) for h in held.values()) if held else 0
         if n < 600:
             return np.nan
-        actual = pooled(0)
+        def pooled(flips=None):
+            parts = []
+            for k, r in enumerate(per_root):
+                h = held[r].fillna(0).values
+                if flips is not None:
+                    h = h * np.repeat(flips[k], block)[:len(h)]
+                parts.append(pd.Series(h, index=held[r].index).shift(1).fillna(0) * trd_r[r])
+            return stats.sharpe(pd.concat(parts, axis=1).mean(axis=1))
+        actual = pooled()
         rng = np.random.default_rng(0)
-        sims = [pooled(int(s)) for s in rng.integers(252, n - 252, reps)]
+        nb = max(len(h) for h in held.values()) // block + 1
+        sims = [pooled(rng.choice([-1.0, 1.0], size=(len(per_root), nb))) for _ in range(reps)]
         return float((np.sum(np.array(sims) >= actual) + 1) / (reps + 1))
 
     def regimes(self, hyp, params, per_root):
@@ -238,10 +248,15 @@ def finalize(research: Research, records: list[dict], cfg: dict, acc: dict) -> d
     tv_sharpes = np.array([t[2] for t in research.trials if not np.isnan(t[2])])
     n_trials = len(research.trials)
     var = float(np.var(tv_sharpes)) if len(tv_sharpes) > 1 else 0.0
+    # effective number of independent trials (Bailey & Lopez de Prado 2014): N / (1 + (N-1) * mean |rho|)
+    trial_mat = pd.DataFrame({f"{t[0]}|{t[1]}": t[3] for t in research.trials}).fillna(0)
+    corr = trial_mat.corr().abs().values
+    rho = (corr.sum() - np.trace(corr)) / max(corr.size - len(corr), 1)
+    n_eff = max(2, int(round(n_trials / (1 + (n_trials - 1) * rho))))
     tested = [r for r in records if "trainval_sharpe" in r]
     for r in tested:
         port = research.run(research.hyps[r["id"]], r["chosen_params"])[0]
-        d = stats.deflated_sharpe(research.split(port, "TRAINVAL"), n_trials, var)
+        d = stats.deflated_sharpe(research.split(port, "TRAINVAL"), n_eff, var)
         r["dsr"], r["dsr_p"], r["sr0_ann"] = d["dsr"], d["p"], d["sr0_ann"]
     fdr = stats.bh_fdr({r["id"]: r.get("perm_p", np.nan) for r in tested}, cfg["fdr_q"])
     for r in tested:
@@ -254,7 +269,8 @@ def finalize(research: Research, records: list[dict], cfg: dict, acc: dict) -> d
         r["status"] = r["machine_status"] if research.data_class == "REAL" else "NOT-RESEARCH (SYNTHETIC)"
     summary = {
         "n_hypotheses_registered": len(records), "n_hypotheses_tested": len(tested),
-        "n_parameter_combinations": n_trials, "trial_sharpe_variance": var,
+        "n_parameter_combinations": n_trials, "effective_independent_trials": n_eff,
+        "mean_abs_trial_correlation": float(rho), "trial_sharpe_variance": var,
         "reality_check_p": rc["p"], "reality_check_best": rc["best"],
         "machine_status_counts": pd.Series([r["machine_status"] for r in records]).value_counts().to_dict(),
         "splits": {"start": str(research.start.date()), "train_end": str(research.train_end.date()),

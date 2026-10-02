@@ -197,3 +197,23 @@ def test_t3_flags_extreme_and_near_zero(data):
 def test_synthetic_paths_stay_positive():
     d = synthetic.generate(start="1995-01-01", end="2025-12-31", roots=("CL", "NG"), mcx=False, seed=7)
     assert (d["prices"].settle > 0).all()
+
+
+def test_signflip_permutation_detects_persistent_edge():
+    """A persistent signal with a real premium must be detected; the same signal with no premium must not."""
+    from commodity.robustness.stats import sharpe
+    rng = np.random.default_rng(3)
+    n = 6000
+    s = np.cumsum(rng.normal(0, 0.02, n))                   # persistent state (random walk)
+    pos = pd.Series(-np.sign(s))
+    noise = pd.Series(rng.normal(0, 0.01, n))
+    with_edge = noise + 0.0006 * pos.shift(1).fillna(0)
+    def p_value(r, reps=200, block=63):
+        actual = sharpe(pos.shift(1).fillna(0) * r)
+        sims = []
+        for _ in range(reps):
+            f = np.repeat(rng.choice([-1.0, 1.0], n // block + 1), block)[:n]
+            sims.append(sharpe((pos * f).shift(1).fillna(0) * r))
+        return (np.sum(np.array(sims) >= actual) + 1) / (reps + 1)
+    assert p_value(with_edge) < 0.05
+    assert p_value(noise) > 0.05

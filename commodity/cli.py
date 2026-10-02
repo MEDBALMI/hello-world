@@ -49,7 +49,7 @@ def cmd_run(a) -> dict:
     t0 = time.time()
     s = config.settings()
     data = P.load(a.source, scenario=a.scenario, seed=a.seed)
-    tag = f"{data['data_class'].lower()}_{data['scenario'].lower()}"
+    tag = f"{data['data_class'].lower()}_{data['scenario'].lower()}" + (f"_s{a.seed}" if a.source == "synthetic" else "")
     P.log(f"loaded {len(data['prices'])} contract-days ({data['data_class']}, {data['scenario']})")
     use_db = a.persist and _db_ok()
     if use_db and a.source != "db":
@@ -102,14 +102,17 @@ def final_text(R: dict, secs: float) -> str:
     for r in recs:
         by.setdefault(r.get("machine_status"), []).append(r["id"])
     lines = [f"Run tag `{R['tag']}`, runtime {secs / 60:.1f} min.\n",
-             f"- Hypotheses registered/tested: {S['n_hypotheses_registered']}/{S['n_hypotheses_tested']}; parameter combinations: {S['n_parameter_combinations']}",
+             f"- Hypotheses registered/tested: {S['n_hypotheses_registered']}/{S['n_hypotheses_tested']}; parameter combinations: {S['n_parameter_combinations']} "
+             f"(effective independent trials {S['effective_independent_trials']}, mean |corr| {S['mean_abs_trial_correlation']:.2f})",
              f"- Reality-check p (best of all trials): {S['reality_check_p']:.3f}",
              f"- Machine statuses: " + "; ".join(f"{k}: {', '.join(v)}" for k, v in by.items()),
              f"- Validation: {pd.Series([v['result'] for v in R['validation']]).value_counts().to_dict()}",
              f"- Paper replay (reference book, 1y): {R['paper']}"]
     if R["data_class"] == "SYNTHETIC":
         exp = ("all hypotheses should be REJECTED or WEAK (no edge exists by construction)" if R["scenario"] == "NULL"
-               else "carry-family hypotheses (H11/H12/H13) should be detected; unrelated families should not")
+               else "the carry hypothesis (H11) should be detected. Because the planted premium depends on a persistent "
+                    "curve state, it also creates persistent drift, so trend rules may legitimately earn part of it; "
+                    "unrelated families (positioning, macro, seasonality, mean reversion) should not be accepted")
         lines.append(f"\n**Machinery check:** in scenario `{R['scenario']}` {exp}. Compare with the statuses above.")
     return "\n".join(lines) + "\n"
 
