@@ -4,6 +4,39 @@ Chronological record of what was done, decided, and left open. Newest first.
 
 ---
 
+## 2026-10-02 — Session 2: quantitative foundation (Phase 3 complete, data architecture)
+
+**Done**
+- 02 Part B rewritten as Phase 3 v1.0:
+  - Contract lifecycle with `delivery_risk_date`.
+  - Spot / futures / total return definitions.
+  - Seven continuous-series methods, each evaluated on six criteria (A–F), with a worked numeric example.
+  - **Research price series vs realistic traded P&L series** (rules R1–R4, P1–P9).
+  - Default roll policy ROLL-A.
+- 03 created (design only):
+  - Layered PostgreSQL design (ref/meta/raw/clean/derived/fund/pos/mkt), with tables, keys and relationships.
+  - Mapping from the originally proposed table list.
+  - Data-handling rules for expiry, FND, rolls, illiquidity, missing data, contract changes, negative prices, limit events, abnormal observations and spec changes.
+  - **Timestamp framework**: observation date, release date, release time, first tradable session.
+  - Minimum data, split into essential / useful / optional.
+  - Universe-sufficiency review.
+- 11 created: curve feature definitions TS1–TS12, constant-maturity method CM-1, NG seasonality handling. No empirical work.
+- 16 updated: data sourcing decision and a data-validation pilot are now gates before the Gold module.
+
+**Decisions**
+- P&L only from same-contract differencing with modelled roll trades. Back-adjusted series are dynamic views, never P&L.
+- Stored series: clean contract data, roll schedule, held contract, tradable returns, constant-maturity curve points, features. Dynamic: unadjusted, Panama, ratio, perpetual.
+- Point-in-time rule: as-of join on `available_ts`; first-release vintages; unknown release times are treated as next session.
+- Universe: adequate for **time-series** research (effective breadth roughly 4–7). Not adequate for cross-sectional strategies as a primary line. **LME data access is the binding constraint for base metals.**
+
+**Corrections**
+- Refined the earlier "too few markets" statement (03 §9).
+- Fixed the Panama negative-price explanation: it happens with large cumulative roll *gains* (backwardated histories), not with contango.
+
+**No web verification this session** (as instructed). New timing values are tagged [VERIFY] for confirmation at ingestion.
+
+---
+
 ## 2026-10-02 — Session 1b: source verification pass
 
 **Done**

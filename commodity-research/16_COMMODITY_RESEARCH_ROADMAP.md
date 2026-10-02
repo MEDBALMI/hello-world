@@ -1,78 +1,81 @@
 # 16 — Research Roadmap
 
-> Status: **v0.1 (initial)** — written after Phases 1–2. The final prioritisation (Phase 20) will replace this after the commodity modules are complete. No strategies are ranked.
+> Status: **v0.2 (2026-10-02)** — updated after the quantitative-foundation stage (Phase 3 complete, data architecture designed). The final prioritisation (Phase 20) will replace this once the commodity modules exist. No strategies are ranked.
 
-## Execution order
-| Step | Phases | Output files | Gate to next step |
+## Execution order and gates
+| Step | Phases | Output | Status / gate |
 |---|---|---|---|
-| 1 | 1 Foundations, 2 Equities vs commodities | 01, 02-A | ✅ done (v0.1) |
-| 2 | 3 Market structure + 14 Term structure (theory & construction) | 02-B, 11 | Roll methodology agreed |
-| 3 | 18 Data architecture (design only) + vendor evaluation | 03, SOURCE_REGISTER | Data source decision for per-contract history |
-| 4 | 13 Positioning, 12 Seasonality (method sections) | 10, 12 | Point-in-time alignment rules written |
-| 5 | Core modules: 5 Gold → 6 Crude → 7 Copper → 8 Silver → 9 NatGas → 10 Aluminium | 04–09 | Each module lists hypotheses + data needs |
-| 6 | 11 Cross-commodity, 15 Technical transfer | inside 04–09, 15 | |
-| 7 | 17 MCX implementation | 14 | Contract specs verified from MCX circulars |
-| 8 | 16 Options | 13 | |
-| 9 | 19 Hypotheses, 20 Prioritisation | 15, 16 v1 | → Data build & testing program |
+| 1 | 1 Foundations, 2 Equities vs commodities | 01, 02-A | ✅ v0.1 |
+| 2 | 3 Futures market structure | 02-B | ✅ v1.0. Research series vs P&L series separated; roll policy ROLL-A defined |
+| 3 | 18 Data architecture (design) | 03 | ✅ v1.0 design. Handling rules, timestamp framework, minimum data, universe review |
+| 4 | 14 Term structure (construction) | 11 | ✅ v0.1. Feature definitions only |
+| **5 (next)** | **Data sourcing decision** | SOURCE_REGISTER, 03 §7 | **Gate:** vendor chosen for per-contract CME history (OPEN-3.1); LME decision (OPEN-3.4/8.1); MCX bhavcopy depth known (OPEN-3.6) |
+| 6 | **Data pilot (validation only, no strategies)** | small DB build for GC, CL, MCX GOLD | **Gate:** validation rules V1–V8 pass; naive-vs-chained bias measured (OPEN-3.3); roll offsets calibrated (OPEN-3.2) |
+| 7 | 13 Positioning, 12 Seasonality (method sections) | 10, 12 | COT alignment implemented per 03 §6 |
+| 8 | Core modules: Gold → Crude → Copper → Silver → NatGas → Aluminium | 04–09 | Each lists hypotheses + data needs + timestamp table |
+| 9 | Cross-commodity (11), technical transfer (15) | 04–09, 15 | |
+| 10 | 17 MCX implementation | 14 | Specs, tender rules, costs, taxes |
+| 11 | 16 Options | 13 | |
+| 12 | 19 Hypotheses, 20 Prioritisation | 15, 16 v1 | → testing program |
 
-Rationale: market structure and data construction come before commodity modules because every later hypothesis depends on correctly built return series and point-in-time data.
+Steps 5–6 come **before Gold** because every module depends on reliable contract-level data and a validated roll engine. The pilot is a data-quality exercise. It is not a backtest.
 
-## Initial classification
-### 1. MUST LEARN (before any testing)
-- Contract identity, expiry, FND/LTD, roll mechanics (01 §D; 02 §B)
-- Return decomposition: spot vs roll vs collateral (02 §A.2)
-- Theory of storage: inventory ↔ convenience yield ↔ curve (01 §E)
-- Point-in-time alignment of COT, EIA and macro releases (01#34, 36)
-- MCX = global price × USDINR × duties/premia, with different expiries (→ 14)
+## Classification
+### 1. MUST LEARN
+- Contract lifecycle and `delivery_risk_date` (02 §B.1)
+- Research series vs realistic P&L series (02 §B.5)
+- Which continuous method suits which purpose (02 §B.4 matrix)
+- Information-availability framework (03 §6)
+- MCX = NYMEX/COMEX/LME reference × USDINR × duties, with different expiries (→ 14)
 
-### 2. MUST DATA (needed for almost every hypothesis)
-- Per-contract daily OHLC/settle/volume/OI incl. expired contracts, with FND/LTD — core 6 commodities [OPEN-3.1]
-- Risk-free rates (US T-bill/SOFR; India 91-day T-bill), USDINR reference rate
-- CFTC COT (Legacy 1986+, Disaggregated 2006+), with release timestamps
-- EIA weekly petroleum & NG storage (with release dates; vintages where possible)
-- MCX per-contract bhavcopy history
+### 2. MUST DATA (Essential, 03 §8.1)
+- Per-contract daily data incl. expired contracts, per-contract calendars, spec history, trading calendars
+- USD and INR short rates; USDINR reference fixing; cost-model inputs
+- ≥ 20 years for global markets; all available MCX history
 
-### 3. MUST TEST (first candidates; details in 15 later)
-- Quantify naive-vs-correct continuous-series bias per commodity [OPEN-3.3] — a *data-validation* test, not a strategy
-- Return decomposition (spot vs roll) per core commodity [OPEN-1.2]
-- Curve slope → subsequent excess returns, time-series, per commodity [OPEN-1.3]
-- Time-series trend on correctly built series (baseline before any equity-style pattern tests)
+### 3. MUST TEST (data-validation tests first, then hypotheses)
+- Naive vs chained-return bias per commodity [OPEN-3.3]
+- Spot vs roll return decomposition per commodity [OPEN-1.2]
+- Effective breadth of the 11-market universe [OPEN-9.1]
+- Then the first hypotheses: time-series carry (H-TS1), time-series trend on chained series (baseline)
 
 ### 4. LATER
-- Commodity-specific fundamentals (inventory surprises, TC/RC, crack spreads)
+- Fundamentals with vintages; COT features; seasonality tests
 - Equity pattern transfers (VCP, Cup & Handle, trend template)
-- Options / volatility risk premium
-- Secondary metals (Pt, Pd, Zn, Ni, Pb)
-- Intraday data and execution modelling
+- Options / volatility premium; intraday execution; secondary-metal deep dives
 
 ### 5. CURRENTLY OUT OF SCOPE
-- Agriculture (all)
-- Live or paper trading
-- Large data downloads and production code
-- Physical commodity trading, OTC swaps
+- Agriculture; live or paper trading; production code; physical/OTC trading; cross-sectional commodity strategies as a primary line (03 §9)
 
-## Key risks to the program
-| Risk | Impact | Mitigation |
-|---|---|---|
-| Cost/availability of per-contract history (esp. LME) | Blocks Phase 3 testing | Vendor evaluation early (step 3). EIA contracts 1–4 cover energy only up to 5 Apr 2024 (publication stopped) — not an ongoing fallback. MCX bhavcopy is free for MCX contracts |
-| Small universe (6 core, ≤11 total) | Cross-sectional strategies have little breadth; high risk of overfitting | Prefer time-series tests; strict multiple-testing control; pool evidence across commodities |
-| Regime breaks (financialisation ~2004, shale ~2010, US exports 2016, MCX regulatory changes, 2020/2022 shocks) | Unstable relationships | Sub-period tests, structural-break tests |
-| Look-ahead in fundamentals/positioning | Inflated results | Release-timestamped tables; vintage data |
-| MCX-specific costs (CTT, stamp duty, exchange fees, GST), expiry mismatch, lot changes | Global edge may not survive locally | Dedicated MCX cost model in 14 |
-| Numbers quoted from memory | Spec errors | [V-S]/[V-2]/[VERIFY] tags; SOURCE_REGISTER status. Primary sites (CME, CFTC, MCX) blocked from this environment — full verification needs network access or manual check |
-| CFTC COT program under review (May 2026 RFC on frequency/content) | Schema/history comparability | Track outcome (OPEN-1.6) |
+## Key risks
+| Risk | Mitigation |
+|---|---|
+| Per-contract history cost; **LME licensing** (base-metal cluster otherwise copper-only globally) | Steps 5–6 decide before modules |
+| Thin effective breadth (~4–7 bets) | Time-series focus, pre-registration, long history, pooled panel tests with date-clustered errors, final hold-out |
+| Regime breaks (2004 financialisation, shale, 2016 US exports, 2020, 2022, MCX rule changes) | Sub-period and structural-break tests |
+| Look-ahead in fundamentals and positioning | 03 §6 mandatory; first-release vintages |
+| Back-adjusted series used for P&L or level signals | 02 §B.5 rules R1–R4, P1–P9 |
+| MCX costs, taxes, tender periods, expiry mismatch | 14 |
+| CFTC COT program changes (2026 review) | OPEN-1.6 |
+| Primary sites blocked from this environment | Verify at ingestion or manually |
 
 ## Consolidated open questions
 | ID | Question | Where |
 |---|---|---|
-| OPEN-1.1 | Historical margin data availability (CME, MCX) | 01 |
-| OPEN-1.2 | Spot vs roll contribution to long-run returns per commodity | 01 |
-| OPEN-1.3 | Does curve slope predict time-series returns in our core 6? | 01, 11 |
-| OPEN-1.4 | MCX positioning/participant data availability | 01, 10, 14 |
-| OPEN-1.5 / 3.1 | Affordable per-contract history source | 01, 02 |
-| OPEN-3.2 | Optimal roll offset per commodity | 02 |
-| OPEN-3.3 | Size of naive roll-gap bias | 02 |
-| OPEN-3.4 | Aluminium benchmark choice (LME vs CME vs MCX) | 02 |
-| OPEN-1.6 | Outcome of CFTC 2026 COT review | 01, 10 |
-| OPEN-3.5 | Negative-price handling (NYMEX & MCX crude, Apr 2020) | 02 |
-| OPEN-3.6 | MCX bhavcopy earliest date / format history | 02, 14 |
+| OPEN-1.1 | Historical margins and price-limit histories | 01, 03 |
+| OPEN-1.2 | Spot vs roll contribution per commodity | 01, 02 |
+| OPEN-1.3 | Does carry predict time-series returns in our markets? | 11 |
+| OPEN-1.4 | MCX/LME positioning data | 03 |
+| OPEN-1.6 | Outcome of CFTC 2026 COT review | 01, 03 |
+| OPEN-3.1 | Per-contract history vendor | 02, 03 |
+| OPEN-3.2 | Roll offset/window per commodity | 02 |
+| OPEN-3.3 | Naive vs chained bias | 02 |
+| OPEN-3.4 / 8.1 | LME licensing; aluminium benchmark | 02, 03 |
+| OPEN-3.5 | Negative-price impact on 2020 crude | 02, 03 §5.7 |
+| OPEN-3.6 | MCX bhavcopy depth/format | 02, 03 |
+| OPEN-3.7 | MCX tender/delivery-period rules | 02, 03 |
+| OPEN-6.1 | Historical release times | 03 |
+| OPEN-6.2 | Fundamental-data vintages | 03 |
+| OPEN-8.2 | Slippage calibration without intraday data | 03 |
+| OPEN-9.1 | Measured effective breadth | 03 |
+| OPEN-11.1–11.3 | NG seasonal adjustment; storage-cost assumptions; metals curve depth | 11 |

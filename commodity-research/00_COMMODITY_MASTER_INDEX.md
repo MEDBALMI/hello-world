@@ -3,7 +3,7 @@
 **Objective:** build institutional-quality understanding of metals and energy futures (global + MCX), then develop and rigorously test hypotheses. **Not** a strategy search.
 
 **Pipeline:** Knowledge → Market structure → Data → Hypotheses → Historical testing → Robustness → OOS → Paper trading → Live.
-**Current stage:** Knowledge / Market structure (Phases 1–3). No data downloaded, no backtests, no strategies.
+**Current stage:** Quantitative foundation complete (Phases 1–3, data architecture design). Next: data sourcing decision and a data-validation pilot. No data downloaded, no backtests, no strategies.
 
 ## Scope
 | Tier | Commodities |
@@ -46,8 +46,8 @@ Three layers; each concept is defined **once** and cross-referenced.
 | File | Phase(s) | Status |
 |---|---|---|
 | [01_COMMODITY_FOUNDATIONS.md](01_COMMODITY_FOUNDATIONS.md) | 1 | v0.2 — specs checked |
-| [02_COMMODITY_MARKET_STRUCTURE.md](02_COMMODITY_MARKET_STRUCTURE.md) | 2, 3 | Phase 2 v0.1 complete; Phase 3 construction draft; sources checked (v0.2) |
-| 03_COMMODITY_DATA_ARCHITECTURE.md | 18 | Not started |
+| [02_COMMODITY_MARKET_STRUCTURE.md](02_COMMODITY_MARKET_STRUCTURE.md) | 2, 3 | v1.0: Phase 2 + Phase 3 complete |
+| [03_COMMODITY_DATA_ARCHITECTURE.md](03_COMMODITY_DATA_ARCHITECTURE.md) | 18 | v1.0 design (no implementation) |
 | 04_GOLD_RESEARCH.md | 5 (+11 gold links) | Not started |
 | 05_CRUDE_OIL_RESEARCH.md | 6 | Not started |
 | 06_COPPER_RESEARCH.md | 7 | Not started |
@@ -55,12 +55,12 @@ Three layers; each concept is defined **once** and cross-referenced.
 | 08_NATURAL_GAS_RESEARCH.md | 9 | Not started |
 | 09_ALUMINIUM_RESEARCH.md | 10 | Not started |
 | 10_COMMODITY_POSITIONING.md | 13 | Not started |
-| 11_COMMODITY_TERM_STRUCTURE.md | 14 (+3 empirical) | Not started |
+| [11_COMMODITY_TERM_STRUCTURE.md](11_COMMODITY_TERM_STRUCTURE.md) | 14 | v0.1 construction/feature definitions |
 | 12_COMMODITY_SEASONALITY.md | 12 | Not started |
 | 13_COMMODITY_OPTIONS.md | 16 | Not started |
 | 14_MCX_IMPLEMENTATION.md | 17 | Not started |
 | 15_COMMODITY_HYPOTHESES.md | 19, 11, 15 | Not started |
-| [16_COMMODITY_RESEARCH_ROADMAP.md](16_COMMODITY_RESEARCH_ROADMAP.md) | 20 | v0.1 (initial) |
+| [16_COMMODITY_RESEARCH_ROADMAP.md](16_COMMODITY_RESEARCH_ROADMAP.md) | 20 | v0.2 |
 | [SOURCE_REGISTER.md](SOURCE_REGISTER.md) | all | v0.1 |
 | [RESEARCH_LOG.md](RESEARCH_LOG.md) | all | ongoing |
 
@@ -69,7 +69,8 @@ Three layers; each concept is defined **once** and cross-referenced.
 |---|---|
 | Spot, futures, forwards, options; contract mechanics; margin; lifecycle | 01 §A–D |
 | Basis, carry, convenience yield, contango/backwardation (definitions) | 01 §E |
-| Roll yield, continuous series, roll schedules | 02 §B |
+| Roll yield, continuous series, roll policy, research vs P&L series | 02 §B |
+| Data handling rules, timestamp framework, minimum data, universe review | 03 §5, §6, §8, §9 |
 | Curve features & empirical curve research | 11 |
 | OI, volume, COT definitions | 01 §F; deep dive 10 |
 | Inventory/supply/demand definitions | 01 §G; commodity-specific in 04–09 |
